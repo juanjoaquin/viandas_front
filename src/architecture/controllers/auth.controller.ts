@@ -4,7 +4,7 @@ import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import type { IAuthRepository } from "@/src/architecture/core/domain/repository/auth/i-auth.repository";
 import { Logger } from "@/src/architecture/infrastructure/logger/logger";
 import { loginUseCase } from "@/src/architecture/use-cases/auth/login.use-case";
-import { getMeUseCase } from "@/src/architecture/use-cases/auth/getMe.use-case";
+import { getMeUseCase } from "@/src/architecture/use-cases/auth/get-me.use-case";
 
 export class AuthController {
 

@@ -1,55 +1,13 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { API_CONFIG } from "@/src/architecture/infrastructure/http/api-config";
-import type { AuthTokens } from "@/src/architecture/core/domain/entities/Auth";
-import type { BackendResponse } from "@/src/architecture/infrastructure/http/types";
+import { NextRequest, NextResponse } from "next/server";
+import { refreshTokensAction } from "@/src/architecture/actions/auth/refresh-tokens.action";
 
-const ACCESS_TOKEN_MAX_AGE = 15 * 60;           // 15 minutos
-const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 días
+export async function GET(request: NextRequest) {
+  const redirectTo = request.nextUrl.searchParams.get("redirect") || "/";
+  const newToken = await refreshTokensAction();
 
-export async function GET() {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  if (!refreshToken) {
-    return NextResponse.json({ ok: false, error: "No refresh token" }, { status: 401 });
+  if (!newToken) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  try {
-    const response = await fetch(`${API_CONFIG.baseUrl}/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-
-    if (!response.ok) {
-      cookieStore.delete("accessToken");
-      cookieStore.delete("refreshToken");
-      return NextResponse.json({ ok: false, error: "Token inválido o expirado" }, { status: 401 });
-    }
-
-    const json = (await response.json()) as BackendResponse<AuthTokens>;
-    const { accessToken, refreshToken: newRefreshToken } = json.data;
-
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax" as const,
-      path: "/",
-    };
-
-    cookieStore.set("accessToken", accessToken, {
-      ...cookieOptions,
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    });
-
-    cookieStore.set("refreshToken", newRefreshToken, {
-      ...cookieOptions,
-      maxAge: REFRESH_TOKEN_MAX_AGE,
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: false, error: "Error de red" }, { status: 500 });
-  }
+  return NextResponse.redirect(new URL(redirectTo, request.url));
 }

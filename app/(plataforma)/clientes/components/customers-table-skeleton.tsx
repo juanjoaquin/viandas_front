@@ -8,44 +8,40 @@ import {
 } from "@/components/ui/table";
 
 const COLUMNS = ["Nombre", "Tipo", "Teléfono", "Dirección"];
-const ROW_COUNT = 5;
+const ROW_COUNT = 6;
+const COL_WIDTHS = ["w-36", "w-16", "w-24", "w-48"];
 
 export function CustomersTableSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="h-9 w-48 animate-pulse rounded-md bg-muted" />
-        <div className="h-9 w-36 animate-pulse rounded-md bg-muted" />
-      </div>
-      <div className="rounded-md border">
+    <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
               {COLUMNS.map((col) => (
-                <TableHead key={col}>{col}</TableHead>
+                <TableHead
+                  key={col}
+                  className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                >
+                  {col}
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: ROW_COUNT }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell>
-                  <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                </TableCell>
-                <TableCell>
-                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-                </TableCell>
-                <TableCell>
-                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-                </TableCell>
-                <TableCell>
-                  <div className="h-4 w-40 animate-pulse rounded bg-muted" />
-                </TableCell>
+                {COL_WIDTHS.map((w, j) => (
+                  <TableCell key={j}>
+                    <div
+                      className={`h-4 ${w} animate-pulse rounded bg-muted`}
+                      style={{ opacity: 1 - i * 0.1 }}
+                    />
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-    </div>
   );
 }

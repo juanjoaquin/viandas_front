@@ -10,7 +10,14 @@ function isPublicRoute(pathname: string): boolean {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
-  const isAuthenticated = Boolean(accessToken);
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+  const isAuthenticated = Boolean(accessToken || refreshToken);
+
+  if (!accessToken && refreshToken && !isPublicRoute(pathname) && pathname !== "/api/refresh") {
+    const refreshUrl = new URL("/api/refresh", request.url);
+    refreshUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(refreshUrl);
+  }
 
   if (!isAuthenticated && !isPublicRoute(pathname)) {
     const loginUrl = new URL("/login", request.url);
@@ -22,7 +29,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("x-pathname", pathname);
+  return response;
 }
 
 export const config = {

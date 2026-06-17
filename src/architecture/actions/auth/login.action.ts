@@ -12,7 +12,7 @@ import { AuthController } from "@/src/architecture/controllers/auth.controller";
 import { AuthRepository } from "@/src/architecture/infrastructure/repositories/auth/auth.repository";
 import { Logger } from "@/src/architecture/infrastructure/logger/logger";
 
-const ACCESS_TOKEN_MAX_AGE = 15 * 60;           // 15 minutos
+const ACCESS_TOKEN_MAX_AGE = 60; // 1 minuto (debug)
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 días
 
 export async function loginAction(input: LoginInput): Promise<Result<AuthTokens>> {

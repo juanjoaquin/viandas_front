@@ -1,6 +1,6 @@
 import { Err, Success, type Result } from "@/src/libs/result";
-import { toFetchInit } from "./fetchAdapter";
-import { toHttpError, toNetworkError } from "./httpErrors";
+import { toFetchInit } from "./fetch-adapter";
+import { toHttpError, toNetworkError } from "./http-errors";
 import type {
   BackendResponse,
   HttpClientConfig,
