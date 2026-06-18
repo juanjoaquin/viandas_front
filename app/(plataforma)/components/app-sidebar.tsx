@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, UtensilsCrossed } from "lucide-react";
+import { Motorbike, Truck, Users, UtensilsCrossed } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import {
   Sidebar,
@@ -16,7 +16,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 const navItems = [
@@ -24,6 +23,11 @@ const navItems = [
     title: "Clientes",
     url: "/clientes",
     icon: Users,
+  },
+  {
+    title: "Deliverys",
+    url: "/deliverys",
+    icon: Motorbike,
   },
 ] as const;
 
@@ -70,7 +74,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             Navegación
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
@@ -93,7 +97,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarSeparator />
+      <div className="mx-3 h-px bg-sidebar-border" />
 
       <SidebarFooter>
         <SidebarMenu>

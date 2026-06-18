@@ -1,10 +1,11 @@
 import { Result } from "@/src/libs/result";
-import { TCustomer } from "../../entities/Customer";
+import { CreateCustomerInput, TCustomer, UpdateCustomerInput } from "../../entities/Customer";
 import { GetCustomersFilters } from "../../customer/get-customers-filters";
 
 export interface ICustomerRepository {
-    getAll(
-        accessToken: string,
-        filters?: GetCustomersFilters,
-    ): Promise<Result<TCustomer[]>>;
+    getAll(filters?: GetCustomersFilters): Promise<Result<TCustomer[]>>;
+    create(data: CreateCustomerInput): Promise<Result<TCustomer>>;
+    getById(id: string): Promise<Result<TCustomer>>;
+    update(id: string, data: UpdateCustomerInput): Promise<Result<void>>;
+    delete(id: string): Promise<Result<void>>;
 }

@@ -4,9 +4,9 @@ import { cookies } from "next/headers";
 import { API_CONFIG } from "@/src/architecture/infrastructure/http/api-config";
 import type { AuthTokens } from "@/src/architecture/core/domain/entities/Auth";
 import type { BackendResponse } from "@/src/architecture/infrastructure/http/types";
-import { Logger } from "@/src/architecture/infrastructure/logger/logger";
+import { Logger, setLogContext } from "@/src/architecture/infrastructure/logger/logger";
 
-const ACCESS_TOKEN_MAX_AGE = 60; // 1 minuto (debug)
+const ACCESS_TOKEN_MAX_AGE = 15 * 60; // 15 minutos
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60;
 
 /**
@@ -20,6 +20,15 @@ export async function refreshTokensAction(): Promise<string | null> {
 
   if (!refreshToken) return null;
 
+  setLogContext({
+    operation: "refresh-tokens",
+    hasAccessToken: false,
+    hasRefreshToken: true,
+    method: "POST",
+    endpoint: "/auth/refresh",
+    url: `${API_CONFIG.baseUrl}/auth/refresh`,
+  });
+
   try {
     const response = await fetch(`${API_CONFIG.baseUrl}/auth/refresh`, {
       method: "POST",
@@ -30,7 +39,9 @@ export async function refreshTokensAction(): Promise<string | null> {
     if (!response.ok) {
       cookieStore.delete("accessToken");
       cookieStore.delete("refreshToken");
-      Logger.warn("[ACTION][REFRESH] Refresh token inválido o expirado");
+      Logger.warn("[ACTION][REFRESH] Refresh token inválido o expirado", {
+        status: response.status,
+      });
       return null;
     }
 

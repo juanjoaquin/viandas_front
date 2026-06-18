@@ -9,12 +9,10 @@ import { Logger } from "../../infrastructure/logger/logger";
 
 export async function getAllCustomersUseCase(
     repository: ICustomerRepository,
-    accessToken: string,
     filters?: GetCustomersFilters,
 ): Promise<Result<TCustomer[]>> {
     try {
         const result = await repository.getAll(
-            accessToken,
             normalizeGetCustomersFilters(filters),
         );
 

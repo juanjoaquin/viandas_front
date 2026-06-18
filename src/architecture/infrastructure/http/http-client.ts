@@ -1,4 +1,5 @@
 import { Err, Success, type Result } from "@/src/libs/result";
+import { Logger, setLogContext } from "@/src/architecture/infrastructure/logger/logger";
 import { toFetchInit } from "./fetch-adapter";
 import { toHttpError, toNetworkError } from "./http-errors";
 import type {
@@ -47,14 +48,18 @@ export class HttpClient implements IHttpClient {
     body: unknown,
     options?: HttpRequestOptions,
   ): Promise<Result<T>> {
-    return this.request<T>("PUT", endpoint, body, options);
+    return this.request<T>("PUT", endpoint, body, {
+      allowNull: true,
+      ...options,
+    });
   }
 
   delete<T>(
     endpoint: string,
+    body?: unknown,
     options?: HttpRequestOptions,
   ): Promise<Result<T>> {
-    return this.request<T>("DELETE", endpoint, undefined, {
+    return this.request<T>("DELETE", endpoint, body, {
       allowNull: true,
       ...options,
     });
@@ -68,30 +73,71 @@ export class HttpClient implements IHttpClient {
   ): Promise<Result<T>> {
     const { allowNull, init } = toFetchInit(options);
     const url = `${this.baseUrl}${normalizeEndpoint(endpoint)}`;
+    const token = (await this.getAuthToken?.()) ?? null;
+    const hasAccessToken = Boolean(token);
+
+    const requestContext = {
+      method,
+      endpoint,
+      url,
+      hasAccessToken,
+      ...(options.tags && { tags: options.tags }),
+    };
+
+    setLogContext(requestContext);
 
     try {
       const response = await fetch(url, {
         ...init,
         method,
-        headers: await this.buildHeaders(init.headers, body),
+        headers: this.buildHeaders(init.headers, body, token),
         ...(body !== undefined && { body: JSON.stringify(body) }),
         signal: AbortSignal.timeout(this.timeoutMs),
       });
 
       if (!response.ok) {
-        return toHttpError(response);
+        const result = await toHttpError(response);
+        if (!result.success) {
+          Logger.error("[HTTP] Request failed", {
+            ...requestContext,
+            status: response.status,
+            error: result.error,
+            code: result.code,
+          });
+        }
+        return result;
       }
 
-      return this.parseSuccessBody<T>(response, allowNull);
+      const result = await this.parseSuccessBody<T>(response, allowNull);
+
+      if (!result.success) {
+        Logger.error("[HTTP] Invalid response body", {
+          ...requestContext,
+          status: response.status,
+          error: result.error,
+          code: result.code,
+        });
+      }
+
+      return result;
     } catch (error) {
-      return toNetworkError(error);
+      const result = toNetworkError(error);
+      if (!result.success) {
+        Logger.error("[HTTP] Network error", {
+          ...requestContext,
+          error: result.error,
+          code: result.code,
+        });
+      }
+      return result;
     }
   }
 
-  private async buildHeaders(
+  private buildHeaders(
     extra?: HeadersInit,
     body?: unknown,
-  ): Promise<Headers> {
+    token?: string | null,
+  ): Headers {
     const headers = new Headers(this.defaultHeaders);
 
     if (body !== undefined) {
@@ -102,7 +148,6 @@ export class HttpClient implements IHttpClient {
       new Headers(extra).forEach((value, key) => headers.set(key, value));
     }
 
-    const token = await this.getAuthToken?.();
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }

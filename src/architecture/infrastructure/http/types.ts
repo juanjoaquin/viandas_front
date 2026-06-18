@@ -15,7 +15,7 @@ export type CacheOptions = {
 
 export type HttpRequestOptions = Omit<RequestInit, "method" | "body"> &
   CacheOptions & {
-    /** Permite respuestas con `data: null` (ej. DELETE, register) */
+    /** Permite respuestas con `data: null` (ej. PUT, DELETE, register) */
     allowNull?: boolean;
   };
 
@@ -38,5 +38,9 @@ export interface IHttpClient {
     body: unknown,
     options?: HttpRequestOptions,
   ): Promise<Result<T>>;
-  delete<T>(endpoint: string, options?: HttpRequestOptions): Promise<Result<T>>;
+  delete<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: HttpRequestOptions,
+  ): Promise<Result<T>>;
 }

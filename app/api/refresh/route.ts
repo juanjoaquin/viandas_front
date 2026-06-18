@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { refreshTokensAction } from "@/src/architecture/actions/auth/refresh-tokens.action";
 
-export async function GET(request: NextRequest) {
+async function handleRefresh(request: NextRequest) {
   const redirectTo = request.nextUrl.searchParams.get("redirect") || "/";
   const newToken = await refreshTokensAction();
 
@@ -10,4 +10,12 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(new URL(redirectTo, request.url));
+}
+
+export async function GET(request: NextRequest) {
+  return handleRefresh(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handleRefresh(request);
 }

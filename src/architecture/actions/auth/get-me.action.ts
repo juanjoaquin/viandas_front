@@ -1,15 +1,15 @@
 "use server";
 
-import { cookies } from "next/headers";
 import type { Result } from "@/src/libs/result";
 import { Err } from "@/src/libs/result";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import { AuthController } from "@/src/architecture/controllers/auth.controller";
 import { AuthRepository } from "@/src/architecture/infrastructure/repositories/auth/auth.repository";
 import { createHttpClient } from "@/src/architecture/infrastructure/http/api-config";
-import { Logger } from "@/src/architecture/infrastructure/logger/logger";
+import { Logger, setLogContext } from "@/src/architecture/infrastructure/logger/logger";
+import { getAccessToken } from "@/src/libs/token";
 
-async function fetchMe(token: string | null): Promise<Result<TUser>> {
+async function fetchMe(token: string): Promise<Result<TUser>> {
   const httpClient = createHttpClient(() => token);
   const repository = new AuthRepository(httpClient);
   const controller = new AuthController(repository);
@@ -18,10 +18,14 @@ async function fetchMe(token: string | null): Promise<Result<TUser>> {
 
 export async function getMeAction(): Promise<Result<TUser>> {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value ?? null;
+    const accessToken = await getAccessToken();
+    setLogContext({ operation: "get-me", hasAccessToken: Boolean(accessToken) });
 
     if (!accessToken) {
+      Logger.warn(
+        "[ACTION][GET-ME] Unauthorized — no access token",
+        { error: "Sesión expirada", code: "UNAUTHORIZED" },
+      );
       return Err("Sesión expirada", "UNAUTHORIZED");
     }
 

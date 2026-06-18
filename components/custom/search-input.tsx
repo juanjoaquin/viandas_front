@@ -5,11 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export function CustomersSearchInput() {
+export function SearchInput({ q }: { q?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(() => searchParams.get("q") ?? "");
+  const [value, setValue] = useState(() => q ?? "");
   const isFocusedRef = useRef(false);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function CustomersSearchInput() {
         onBlur={() => {
           isFocusedRef.current = false;
         }}
-        className="h-8 pl-8 text-sm"
+        className="h-8 border-slate-200/70 bg-slate-100 pl-8 text-sm focus-visible:bg-background dark:border-slate-700 dark:bg-slate-800/60 dark:focus-visible:bg-background"
       />
     </div>
   );
