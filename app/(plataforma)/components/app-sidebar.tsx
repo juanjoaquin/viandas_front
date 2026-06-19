@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Motorbike, Truck, Users, UtensilsCrossed } from "lucide-react";
+import { CalendarDays, ClipboardCheck, ClipboardList, Motorbike, Soup, Users, UtensilsCrossed } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import {
   Sidebar,
@@ -28,6 +28,26 @@ const navItems = [
     title: "Deliverys",
     url: "/deliverys",
     icon: Motorbike,
+  },
+  {
+    title: "Menús",
+    url: "/menus",
+    icon: ClipboardList,
+  },
+  {
+    title: "Platos",
+    url: "/platos",
+    icon: Soup,
+  },
+  {
+    title: "Menú Semanal",
+    url: "/menus-semanales",
+    icon: CalendarDays,
+  },
+  {
+    title: "Producciones",
+    url: "/producciones",
+    icon: ClipboardCheck,
   },
 ] as const;
 

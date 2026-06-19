@@ -8,6 +8,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 const ROUTE_LABELS: Record<string, string> = {
   clientes: "Clientes",
   deliverys: "Repartos",
+  menus: "Menús",
+  platos: "Platos",
+  "menus-semanales": "Menú Semanal",
+  producciones: "Producciones",
   pedidos: "Pedidos",
   productos: "Productos",
   reportes: "Reportes",
