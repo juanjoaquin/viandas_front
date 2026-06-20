@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { RouteBackButton } from "./route-back-button";
 
 const ROUTE_LABELS: Record<string, string> = {
   clientes: "Clientes",
@@ -62,13 +63,16 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
 
       {/* Fila 2: título + descripción + acción */}
       <div className="flex items-center justify-between gap-4 px-6 pb-4 pt-1">
-        <div className="space-y-0.5">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            {title}
-          </h1>
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
-          )}
+        <div className="flex min-w-0 items-center gap-3">
+          <RouteBackButton />
+          <div className="min-w-0 space-y-0.5">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+              {title}
+            </h1>
+            {description && (
+              <p className="text-xs text-muted-foreground">{description}</p>
+            )}
+          </div>
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

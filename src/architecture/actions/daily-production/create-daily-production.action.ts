@@ -5,16 +5,16 @@ import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { DailyProductionController } from "../../controllers/daily-production.controller";
 import {
-    CreateDailyProductionInput,
+    CreateDailyProductionPayload,
     TDailyProduction,
-    createDailyProductionInputSchema,
+    createDailyProductionPayloadSchema,
 } from "../../core/domain/entities/DailyProduction";
 import { createHttpClient } from "../../infrastructure/http/api-config";
 import { Logger, setLogContext } from "../../infrastructure/logger/logger";
 import { DailyProductionRepository } from "../../infrastructure/repositories/daily-production/daily-production.repository";
 
 export async function createDailyProductionAction(
-    data: CreateDailyProductionInput,
+    data: CreateDailyProductionPayload,
 ): Promise<Result<TDailyProduction>> {
     const accessToken = await getAccessToken();
 
@@ -26,7 +26,7 @@ export async function createDailyProductionAction(
         return Err("No access token found", "UNAUTHORIZED");
     }
 
-    const parsed = createDailyProductionInputSchema.safeParse(data);
+    const parsed = createDailyProductionPayloadSchema.safeParse(data);
     if (!parsed.success) {
         return Err(
             parsed.error.issues[0]?.message ?? "Datos inválidos",

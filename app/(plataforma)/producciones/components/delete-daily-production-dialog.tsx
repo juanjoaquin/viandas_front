@@ -67,7 +67,7 @@ export function DeleteDailyProductionDialog({
                     <AlertDialogDescription>
                         Vas a eliminar la producción de{" "}
                         <strong>{production.customer?.name ?? "este cliente"}</strong>. Se
-                        borrarán también sus líneas y extras asociados. Esta acción no se
+                        borrarán también sus líneas y productos asociados. Esta acción no se
                         puede deshacer.
                     </AlertDialogDescription>
                 </AlertDialogHeader>

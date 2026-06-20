@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { PackagePlus, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/tooltip";
 import { TDailyProduction } from "@/src/architecture/core/domain/entities/DailyProduction";
 import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
+import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
+import { AddDailyProductionExtraForm } from "./add-daily-production-extra-form";
 import { DeleteDailyProductionDialog } from "./delete-daily-production-dialog";
 import { EditDailyProductionDialog } from "./edit-daily-production-dialog";
 
@@ -19,13 +21,16 @@ type DailyProductionRowActionsProps = {
     production: TDailyProduction;
     deliveries: TDelivery[];
     menuTypes: TMenuType[];
+    extraProducts: TExtraProduct[];
 };
 
 export function DailyProductionRowActions({
     production,
     deliveries,
     menuTypes,
+    extraProducts,
 }: DailyProductionRowActionsProps) {
+    const [addExtraOpen, setAddExtraOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -34,6 +39,23 @@ export function DailyProductionRowActions({
     return (
         <>
             <div className="inline-flex items-center gap-1.5">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            disabled={isDeleting}
+                            aria-label={`Agregar producto a ${customerName}`}
+                            className="border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                            onClick={() => setAddExtraOpen(true)}
+                        >
+                            <PackagePlus className="size-3.5" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Agregar producto</TooltipContent>
+                </Tooltip>
+
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -69,10 +91,18 @@ export function DailyProductionRowActions({
                 </Tooltip>
             </div>
 
+            <AddDailyProductionExtraForm
+                production={production}
+                extraProducts={extraProducts}
+                open={addExtraOpen}
+                onOpenChange={setAddExtraOpen}
+            />
+
             <EditDailyProductionDialog
                 production={production}
                 deliveries={deliveries}
                 menuTypes={menuTypes}
+                extraProducts={extraProducts}
                 open={editOpen}
                 onOpenChange={setEditOpen}
             />

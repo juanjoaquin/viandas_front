@@ -2,8 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, ClipboardCheck, ClipboardList, Motorbike, Soup, Users, UtensilsCrossed } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ClipboardCheck,
+  ClipboardList,
+  Motorbike,
+  Package,
+  Soup,
+  Tags,
+  Users,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +29,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 
@@ -40,6 +57,22 @@ const navItems = [
     icon: Soup,
   },
   {
+    title: "Productos",
+    icon: Package,
+    children: [
+      {
+        title: "Categorías",
+        url: "/categorias",
+        icon: Tags,
+      },
+      {
+        title: "Productos",
+        url: "/productos",
+        icon: Package,
+      },
+    ],
+  },
+  {
     title: "Menú Semanal",
     url: "/menus-semanales",
     icon: CalendarDays,
@@ -50,6 +83,85 @@ const navItems = [
     icon: ClipboardCheck,
   },
 ] as const;
+
+type NavChild = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+};
+
+type CollapsibleNavItemProps = {
+  title: string;
+  icon: LucideIcon;
+  subItems: readonly NavChild[];
+  pathname: string;
+};
+
+function CollapsibleNavItem({
+  title,
+  icon: Icon,
+  subItems,
+  pathname,
+}: CollapsibleNavItemProps) {
+  const isParentActive = subItems.some(
+    (child) =>
+      pathname === child.url || pathname.startsWith(`${child.url}/`),
+  );
+  const [open, setOpen] = useState(isParentActive);
+
+  useEffect(() => {
+    if (isParentActive) {
+      setOpen(true);
+    }
+  }, [isParentActive]);
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        isActive={isParentActive}
+        tooltip={title}
+      >
+        <Icon />
+        <span>{title}</span>
+        <ChevronDown
+          className={cn(
+            "ml-auto size-4 shrink-0 transition-transform duration-200 ease-in-out",
+            open && "rotate-180",
+          )}
+        />
+      </SidebarMenuButton>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-200 ease-in-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          <SidebarMenuSub className={cn(!open && "pointer-events-none")}>
+            {subItems.map((child) => (
+              <SidebarMenuSubItem key={child.title}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={
+                    pathname === child.url ||
+                    pathname.startsWith(`${child.url}/`)
+                  }
+                >
+                  <Link href={child.url}>
+                    <child.icon />
+                    <span>{child.title}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </div>
+      </div>
+    </SidebarMenuItem>
+  );
+}
 
 type AppSidebarProps = {
   user: TUser;
@@ -95,23 +207,39 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      pathname === item.url ||
-                      pathname.startsWith(`${item.url}/`)
-                    }
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const hasChildren = "children" in item;
+
+                if (hasChildren) {
+                  return (
+                    <CollapsibleNavItem
+                      key={item.title}
+                      title={item.title}
+                      icon={item.icon}
+                      subItems={item.children}
+                      pathname={pathname}
+                    />
+                  );
+                }
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        pathname === item.url ||
+                        pathname.startsWith(`${item.url}/`)
+                      }
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

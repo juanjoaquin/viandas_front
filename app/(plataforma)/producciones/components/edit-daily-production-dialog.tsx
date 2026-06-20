@@ -29,14 +29,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { addDailyProductionExtraAction } from "@/src/architecture/actions/daily-production/add-daily-production-extra.action";
+import { deleteDailyProductionExtraAction } from "@/src/architecture/actions/daily-production/delete-daily-production-extra.action";
 import { deleteDailyProductionLineAction } from "@/src/architecture/actions/daily-production/delete-daily-production-line.action";
 import { updateDailyProductionAction } from "@/src/architecture/actions/daily-production/update-daily-production.action";
+import { updateDailyProductionExtraAction } from "@/src/architecture/actions/daily-production/update-daily-production-extra.action";
 import { upsertDailyProductionLineAction } from "@/src/architecture/actions/daily-production/upsert-daily-production-line.action";
 import {
     TDailyProduction,
     TFulfillmentType,
 } from "@/src/architecture/core/domain/entities/DailyProduction";
 import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
+import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
 
 type EditLineForm = {
@@ -45,11 +49,18 @@ type EditLineForm = {
     quantity: number;
 };
 
+type EditExtraForm = {
+    extra_id?: string;
+    extra_product_id: string;
+    quantity: number;
+};
+
 type EditDailyProductionForm = {
     fulfillment_type: TFulfillmentType;
     delivery_id: string;
     notes: string;
     lines: EditLineForm[];
+    extras: EditExtraForm[];
 };
 
 const fulfillmentLabels: Record<TFulfillmentType, string> = {
@@ -61,6 +72,13 @@ const fulfillmentLabels: Record<TFulfillmentType, string> = {
 function emptyLine(): EditLineForm {
     return {
         menu_type_id: "",
+        quantity: 1,
+    };
+}
+
+function emptyExtra(): EditExtraForm {
+    return {
+        extra_product_id: "",
         quantity: 1,
     };
 }
@@ -77,10 +95,27 @@ function getDefaultLines(production: TDailyProduction): EditLineForm[] {
     return lines && lines.length > 0 ? lines : [emptyLine()];
 }
 
+function getDefaultExtras(production: TDailyProduction): EditExtraForm[] {
+    const extras = production.extras
+        ?.filter((extra) => extra.extra_product?.id)
+        .map((extra) => ({
+            extra_id: extra.id,
+            extra_product_id: extra.extra_product?.id ?? "",
+            quantity: extra.quantity,
+        }));
+
+    return extras && extras.length > 0 ? extras : [emptyExtra()];
+}
+
+function completeExtrasCount(extras?: EditExtraForm[]) {
+    return extras?.filter((extra) => extra.extra_product_id).length ?? 0;
+}
+
 type EditDailyProductionDialogProps = {
     production: TDailyProduction;
     deliveries: TDelivery[];
     menuTypes: TMenuType[];
+    extraProducts: TExtraProduct[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
@@ -89,6 +124,7 @@ export function EditDailyProductionDialog({
     production,
     deliveries,
     menuTypes,
+    extraProducts,
     open,
     onOpenChange,
 }: EditDailyProductionDialogProps) {
@@ -107,12 +143,26 @@ export function EditDailyProductionDialog({
             delivery_id: production.delivery?.id ?? "",
             notes: production.notes ?? "",
             lines: getDefaultLines(production),
+            extras: getDefaultExtras(production),
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const {
+        fields: lineFields,
+        append: appendLine,
+        remove: removeLine,
+    } = useFieldArray({
         control,
         name: "lines",
+    });
+
+    const {
+        fields: extraFields,
+        append: appendExtra,
+        remove: removeExtra,
+    } = useFieldArray({
+        control,
+        name: "extras",
     });
 
     const fulfillmentType = useWatch({
@@ -122,6 +172,10 @@ export function EditDailyProductionDialog({
     const lines = useWatch({
         control,
         name: "lines",
+    });
+    const extras = useWatch({
+        control,
+        name: "extras",
     });
 
     function handleOpenChange(value: boolean) {
@@ -139,6 +193,16 @@ export function EditDailyProductionDialog({
         );
     }
 
+    function usedExtraProductIds(currentIndex: number) {
+        return new Set(
+            extras
+                ?.map((extra, index) =>
+                    index === currentIndex ? "" : extra.extra_product_id,
+                )
+                .filter(Boolean),
+        );
+    }
+
     async function onSubmit(data: EditDailyProductionForm) {
         if (data.fulfillment_type === "DELIVERY" && !data.delivery_id) {
             toast.error("Seleccioná un repartidor para el delivery");
@@ -146,8 +210,16 @@ export function EditDailyProductionDialog({
         }
 
         const completeLines = data.lines.filter((line) => line.menu_type_id);
-        if (completeLines.length === 0) {
-            toast.error("Debe quedar al menos un menú cargado");
+        const completeExtras = data.extras.filter((extra) => extra.extra_product_id);
+        if (completeLines.length === 0 && completeExtras.length === 0) {
+            toast.error("Debe quedar al menos un menú o un producto");
+            return;
+        }
+        if (
+            new Set(completeExtras.map((extra) => extra.extra_product_id)).size !==
+            completeExtras.length
+        ) {
+            toast.error("No repitas productos en la misma producción");
             return;
         }
 
@@ -226,6 +298,55 @@ export function EditDailyProductionDialog({
 
                 if (!lineResult.success) {
                     toast.error(lineResult.error);
+                    return;
+                }
+            }
+
+            const originalExtras = production.extras ?? [];
+            const submittedExtraIds = new Set(
+                completeExtras
+                    .map((extra) => extra.extra_id)
+                    .filter((extraId): extraId is string => Boolean(extraId)),
+            );
+
+            for (const originalExtra of originalExtras) {
+                if (submittedExtraIds.has(originalExtra.id)) {
+                    continue;
+                }
+
+                const deleteResult = await deleteDailyProductionExtraAction(
+                    production.id,
+                    originalExtra.id,
+                    production.production_date,
+                );
+
+                if (!deleteResult.success) {
+                    toast.error(deleteResult.error);
+                    return;
+                }
+            }
+
+            for (const extra of completeExtras) {
+                const payload = {
+                    extra_product_id: extra.extra_product_id,
+                    quantity: Number(extra.quantity),
+                };
+
+                const extraResult = extra.extra_id
+                    ? await updateDailyProductionExtraAction(
+                          production.id,
+                          extra.extra_id,
+                          payload,
+                          production.production_date,
+                      )
+                    : await addDailyProductionExtraAction(
+                          production.id,
+                          payload,
+                          production.production_date,
+                      );
+
+                if (!extraResult.success) {
+                    toast.error(extraResult.error);
                     return;
                 }
             }
@@ -350,7 +471,7 @@ export function EditDailyProductionDialog({
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => append(emptyLine())}
+                                    onClick={() => appendLine(emptyLine())}
                                 >
                                     <Plus data-icon="inline-start" />
                                     Agregar menú
@@ -358,7 +479,7 @@ export function EditDailyProductionDialog({
                             </div>
 
                             <div className="space-y-2">
-                                {fields.map((line, index) => {
+                                {lineFields.map((line, index) => {
                                     const disabledIds = usedMenuTypeIds(index);
 
                                     return (
@@ -454,8 +575,138 @@ export function EditDailyProductionDialog({
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
-                                                disabled={fields.length === 1}
-                                                onClick={() => remove(index)}
+                                                disabled={
+                                                    lineFields.length === 1 &&
+                                                    completeExtrasCount(extras) === 0
+                                                }
+                                                onClick={() => removeLine(index)}
+                                                className="justify-self-start text-muted-foreground sm:justify-self-end"
+                                            >
+                                                Quitar
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </Field>
+
+                        <Field>
+                            <div className="flex items-center justify-between gap-3">
+                                <FieldLabel>Productos y cantidades</FieldLabel>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => appendExtra(emptyExtra())}
+                                >
+                                    <Plus data-icon="inline-start" />
+                                    Agregar producto
+                                </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {extraFields.map((extra, index) => {
+                                    const disabledIds = usedExtraProductIds(index);
+
+                                    return (
+                                        <div
+                                            key={extra.id}
+                                            className="grid gap-2 rounded-lg border bg-background p-3 sm:grid-cols-[1fr_auto_auto]"
+                                        >
+                                            <Controller
+                                                name={`extras.${index}.extra_product_id`}
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Select
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                        >
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Seleccionar producto" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {extraProducts
+                                                                    .filter(
+                                                                        (product) =>
+                                                                            product.active ||
+                                                                            product.id === field.value,
+                                                                    )
+                                                                    .map((product) => (
+                                                                        <SelectItem
+                                                                            key={product.id}
+                                                                            value={product.id}
+                                                                            disabled={disabledIds.has(product.id)}
+                                                                        >
+                                                                            {product.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {fieldState.invalid && (
+                                                            <FieldError errors={[fieldState.error]} />
+                                                        )}
+                                                    </Field>
+                                                )}
+                                            />
+
+                                            <Controller
+                                                name={`extras.${index}.quantity`}
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Field>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="icon-sm"
+                                                                onClick={() =>
+                                                                    field.onChange(
+                                                                        Math.max(1, Number(field.value) - 1),
+                                                                    )
+                                                                }
+                                                                aria-label="Disminuir cantidad"
+                                                            >
+                                                                <Minus className="size-3.5" />
+                                                            </Button>
+                                                            <Input
+                                                                type="number"
+                                                                min={1}
+                                                                value={field.value}
+                                                                onChange={(event) =>
+                                                                    field.onChange(
+                                                                        Number(event.target.value || 1),
+                                                                    )
+                                                                }
+                                                                className="h-8 w-16 text-center"
+                                                                aria-label="Cantidad"
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="icon-sm"
+                                                                onClick={() =>
+                                                                    field.onChange(Number(field.value) + 1)
+                                                                }
+                                                                aria-label="Aumentar cantidad"
+                                                            >
+                                                                <Plus className="size-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </Field>
+                                                )}
+                                            />
+
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={
+                                                    extraFields.length === 1 &&
+                                                    (lines?.filter((line) => line.menu_type_id).length ??
+                                                        0) === 0
+                                                }
+                                                onClick={() => removeExtra(index)}
                                                 className="justify-self-start text-muted-foreground sm:justify-self-end"
                                             >
                                                 Quitar

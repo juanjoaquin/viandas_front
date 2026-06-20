@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Minus, Plus, Trash2, UtensilsCrossed } from "lucide-react";
+import { Controller, FieldErrors, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Minus, PackagePlus, Plus, Trash2, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { CustomerSearchInput } from "@/components/custom/inputs/customer-search-input";
-import { createDailyProductionAction } from "@/src/architecture/actions/daily-production/create-daily-production.action";
+import { createDailyProductionWithExtrasAction } from "@/src/architecture/actions/daily-production/create-daily-production-with-extras.action";
 import {
-    CreateDailyProductionInput,
+    CreateDailyProductionFormInput,
     TFulfillmentType,
-    createDailyProductionInputSchema,
+    createDailyProductionFormInputSchema,
 } from "@/src/architecture/core/domain/entities/DailyProduction";
 import { TCustomer } from "@/src/architecture/core/domain/entities/Customer";
 import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
+import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
 
 const fulfillmentLabels: Record<TFulfillmentType, string> = {
@@ -65,16 +66,46 @@ function emptyLine() {
     };
 }
 
+function emptyExtra() {
+    return {
+        extra_product_id: "",
+        quantity: 1,
+    };
+}
+
+function hasOrderItemsError(errors: FieldErrors<CreateDailyProductionFormInput>): boolean {
+    if (errors.lines?.[0]?.menu_type_id) {
+        return true;
+    }
+
+    if (errors.extras?.[0]?.extra_product_id) {
+        return true;
+    }
+
+    return false;
+}
+
+function getOrderItemsErrorMessage(
+    errors: FieldErrors<CreateDailyProductionFormInput>,
+): string | undefined {
+    return (
+        errors.lines?.[0]?.menu_type_id?.message ??
+        errors.extras?.[0]?.extra_product_id?.message
+    );
+}
+
 type CreateDailyProductionDialogProps = {
     initialDate: string;
     menuTypes: TMenuType[];
     deliveries: TDelivery[];
+    extraProducts: TExtraProduct[];
 };
 
 export function CreateDailyProductionDialog({
     initialDate,
     menuTypes,
     deliveries,
+    extraProducts,
 }: CreateDailyProductionDialogProps) {
     const [open, setOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] =
@@ -86,10 +117,12 @@ export function CreateDailyProductionDialog({
         handleSubmit,
         reset,
         setValue,
-        formState: { isSubmitting },
-    } = useForm<CreateDailyProductionInput>({
-        resolver: zodResolver(createDailyProductionInputSchema),
-        mode: "onBlur",
+        formState: { isSubmitting, errors },
+    } = useForm<CreateDailyProductionFormInput>({
+        resolver: zodResolver(createDailyProductionFormInputSchema),
+        mode: "onSubmit",
+        reValidateMode: "onChange",
+        shouldFocusError: true,
         defaultValues: {
             production_date: initialDate,
             customer_id: "",
@@ -97,12 +130,26 @@ export function CreateDailyProductionDialog({
             delivery_id: "",
             notes: "",
             lines: [emptyLine()],
+            extras: [],
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const {
+        fields: lineFields,
+        append: appendLine,
+        remove: removeLine,
+    } = useFieldArray({
         control,
         name: "lines",
+    });
+
+    const {
+        fields: extraFields,
+        append: appendExtra,
+        remove: removeExtra,
+    } = useFieldArray({
+        control,
+        name: "extras",
     });
 
     const fulfillmentType = useWatch({
@@ -113,6 +160,12 @@ export function CreateDailyProductionDialog({
         control,
         name: "lines",
     });
+    const extras = useWatch({
+        control,
+        name: "extras",
+    });
+
+    const activeExtraProducts = extraProducts.filter((product) => product.active);
 
     function resetForm() {
         reset({
@@ -122,6 +175,7 @@ export function CreateDailyProductionDialog({
             delivery_id: "",
             notes: "",
             lines: [emptyLine()],
+            extras: [],
         });
         setSelectedCustomer(null);
     }
@@ -131,12 +185,27 @@ export function CreateDailyProductionDialog({
         setOpen(value);
     }
 
-    async function onSubmit(data: CreateDailyProductionInput) {
+    const orderItemsErrorMessage = getOrderItemsErrorMessage(errors);
+    const showOrderItemsError = hasOrderItemsError(errors);
+
+    async function onSubmit(data: CreateDailyProductionFormInput) {
+        const validation = createDailyProductionFormInputSchema.safeParse(data);
+        if (!validation.success) {
+            return;
+        }
+
         try {
-            const result = await createDailyProductionAction(data);
+            const result = await createDailyProductionWithExtrasAction(data);
 
             if (result.success) {
                 toast.success("Producción creada correctamente");
+                router.refresh();
+                handleOpenChange(false);
+                return;
+            }
+
+            if (result.code === "PARTIAL") {
+                toast.warning(result.error);
                 router.refresh();
                 handleOpenChange(false);
                 return;
@@ -157,6 +226,16 @@ export function CreateDailyProductionDialog({
         );
     }
 
+    function usedExtraProductIds(currentIndex: number) {
+        return new Set(
+            extras
+                ?.map((extra, index) =>
+                    index === currentIndex ? "" : extra.extra_product_id,
+                )
+                .filter(Boolean),
+        );
+    }
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
@@ -172,11 +251,14 @@ export function CreateDailyProductionDialog({
                         Crear Producción Diaria
                     </DialogTitle>
                     <DialogDescription>
-                        Cargá el cliente, tipo de entrega y cantidades por tipo de menú.
+                        Cargá el cliente, entrega y al menos una vianda o un producto.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form id="create-daily-production-form" onSubmit={handleSubmit(onSubmit)}>
+                <form
+                    id="create-daily-production-form"
+                    onSubmit={handleSubmit(onSubmit)}
+                >
                     <FieldGroup>
                         <div className="grid gap-3 sm:grid-cols-2">
                             <Controller
@@ -328,129 +410,343 @@ export function CreateDailyProductionDialog({
                             )}
                         />
 
-                        <Field>
+                        <Field
+                            data-invalid={
+                                showOrderItemsError || Boolean(errors.lines?.[0]?.menu_type_id)
+                            }
+                        >
                             <div className="flex items-center justify-between gap-3">
-                                <FieldLabel>
-                                    Menús y cantidades
-                                    <RequiredMark />
-                                </FieldLabel>
+                                <FieldLabel>Menús y cantidades</FieldLabel>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => append(emptyLine())}
+                                    onClick={() => appendLine(emptyLine())}
                                 >
                                     <Plus data-icon="inline-start" />
                                     Agregar menú
                                 </Button>
                             </div>
 
+                            {orderItemsErrorMessage && lineFields.length > 0 ? (
+                                <FieldError
+                                    errors={[{ message: orderItemsErrorMessage }]}
+                                />
+                            ) : null}
+
                             <div className="space-y-2">
-                                {fields.map((line, index) => {
+                                {lineFields.map((line, index) => {
                                     const disabledIds = usedMenuTypeIds(index);
+                                    const lineMenuError = errors.lines?.[index]?.menu_type_id;
 
                                     return (
                                         <div
                                             key={line.id}
                                             className="grid gap-2 rounded-lg border bg-background p-3 sm:grid-cols-[1fr_auto_auto]"
                                         >
-                                            <Controller
-                                                name={`lines.${index}.menu_type_id`}
-                                                control={control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <Select
-                                                            value={field.value}
-                                                            onValueChange={field.onChange}
+                                                <Controller
+                                                    name={`lines.${index}.menu_type_id`}
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field
+                                                            data-invalid={
+                                                                fieldState.invalid ||
+                                                                Boolean(lineMenuError)
+                                                            }
                                                         >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Seleccionar tipo de menú" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {menuTypes
-                                                                    .filter((menuType) => menuType.active)
-                                                                    .map((menuType) => (
-                                                                        <SelectItem
-                                                                            key={menuType.id}
-                                                                            value={menuType.id}
-                                                                            disabled={disabledIds.has(menuType.id)}
-                                                                        >
-                                                                            {menuType.name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {fieldState.invalid && (
-                                                            <FieldError errors={[fieldState.error]} />
-                                                        )}
-                                                    </Field>
-                                                )}
-                                            />
-
-                                            <Controller
-                                                name={`lines.${index}.quantity`}
-                                                control={control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="icon-sm"
-                                                                onClick={() =>
-                                                                    field.onChange(
-                                                                        Math.max(1, Number(field.value) - 1),
-                                                                    )
-                                                                }
-                                                                aria-label="Disminuir cantidad"
-                                                            >
-                                                                <Minus className="size-3.5" />
-                                                            </Button>
-                                                            <Input
-                                                                type="number"
-                                                                min={1}
+                                                            <Select
                                                                 value={field.value}
-                                                                onChange={(event) =>
-                                                                    field.onChange(
-                                                                        Number(event.target.value || 1),
-                                                                    )
-                                                                }
-                                                                className="h-8 w-16 text-center"
-                                                                aria-label="Cantidad"
-                                                            />
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="icon-sm"
-                                                                onClick={() =>
-                                                                    field.onChange(Number(field.value) + 1)
-                                                                }
-                                                                aria-label="Aumentar cantidad"
+                                                                onValueChange={field.onChange}
                                                             >
-                                                                <Plus className="size-3.5" />
-                                                            </Button>
-                                                        </div>
-                                                        {fieldState.invalid && (
-                                                            <FieldError errors={[fieldState.error]} />
-                                                        )}
-                                                    </Field>
-                                                )}
-                                            />
+                                                                <SelectTrigger
+                                                                    className="w-full"
+                                                                    aria-invalid={
+                                                                        fieldState.invalid ||
+                                                                        Boolean(lineMenuError)
+                                                                    }
+                                                                >
+                                                                    <SelectValue placeholder="Seleccionar tipo de menú" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {menuTypes
+                                                                        .filter(
+                                                                            (menuType) =>
+                                                                                menuType.active,
+                                                                        )
+                                                                        .map((menuType) => (
+                                                                            <SelectItem
+                                                                                key={menuType.id}
+                                                                                value={menuType.id}
+                                                                                disabled={disabledIds.has(
+                                                                                    menuType.id,
+                                                                                )}
+                                                                            >
+                                                                                {menuType.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {fieldState.invalid && (
+                                                                <FieldError
+                                                                    errors={[fieldState.error]}
+                                                                />
+                                                            )}
+                                                        </Field>
+                                                    )}
+                                                />
 
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon-sm"
-                                                disabled={fields.length === 1}
-                                                onClick={() => remove(index)}
-                                                aria-label="Eliminar línea"
-                                                className="justify-self-start text-muted-foreground hover:text-destructive sm:justify-self-end"
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </Button>
-                                        </div>
-                                    );
+                                                <Controller
+                                                    name={`lines.${index}.quantity`}
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field data-invalid={fieldState.invalid}>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="icon-sm"
+                                                                    onClick={() =>
+                                                                        field.onChange(
+                                                                            Math.max(
+                                                                                1,
+                                                                                Number(field.value) -
+                                                                                    1,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    aria-label="Disminuir cantidad"
+                                                                >
+                                                                    <Minus className="size-3.5" />
+                                                                </Button>
+                                                                <Input
+                                                                    type="number"
+                                                                    min={1}
+                                                                    value={field.value}
+                                                                    onChange={(event) =>
+                                                                        field.onChange(
+                                                                            Number(
+                                                                                event.target
+                                                                                    .value || 1,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    className="h-8 w-16 text-center"
+                                                                    aria-label="Cantidad"
+                                                                />
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="icon-sm"
+                                                                    onClick={() =>
+                                                                        field.onChange(
+                                                                            Number(field.value) + 1,
+                                                                        )
+                                                                    }
+                                                                    aria-label="Aumentar cantidad"
+                                                                >
+                                                                    <Plus className="size-3.5" />
+                                                                </Button>
+                                                            </div>
+                                                            {fieldState.invalid && (
+                                                                <FieldError
+                                                                    errors={[fieldState.error]}
+                                                                />
+                                                            )}
+                                                        </Field>
+                                                    )}
+                                                />
+
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                    disabled={lineFields.length === 1}
+                                                    onClick={() => removeLine(index)}
+                                                    aria-label="Eliminar línea"
+                                                    className="justify-self-start text-muted-foreground hover:text-destructive sm:justify-self-end"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </div>
+                                        );
                                 })}
+                            </div>
+                        </Field>
+
+                        <Field
+                            data-invalid={
+                                showOrderItemsError ||
+                                Boolean(errors.extras?.[0]?.extra_product_id)
+                            }
+                        >
+                            <div className="flex items-center justify-between gap-3">
+                                <FieldLabel>Productos y cantidades</FieldLabel>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => appendExtra(emptyExtra())}
+                                    disabled={activeExtraProducts.length === 0}
+                                >
+                                    <PackagePlus data-icon="inline-start" />
+                                    Agregar producto
+                                </Button>
+                            </div>
+
+                            {activeExtraProducts.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                    No hay productos activos disponibles.
+                                </p>
+                            ) : null}
+
+                            {orderItemsErrorMessage &&
+                            extraFields.length > 0 &&
+                            !errors.lines?.[0]?.menu_type_id ? (
+                                <FieldError
+                                    errors={[{ message: orderItemsErrorMessage }]}
+                                />
+                            ) : null}
+
+                            <div className="space-y-2">
+                                {extraFields.length === 0 ? (
+                                    <p className="rounded-lg border border-dashed px-3 py-4 text-sm text-muted-foreground">
+                                        Sin productos cargados. Podés agregar uno o cargar
+                                        solo viandas.
+                                    </p>
+                                ) : (
+                                    extraFields.map((extra, index) => {
+                                        const disabledIds = usedExtraProductIds(index);
+                                        const extraProductError =
+                                            errors.extras?.[index]?.extra_product_id;
+
+                                        return (
+                                            <div
+                                                key={extra.id}
+                                                className="grid gap-2 rounded-lg border bg-background p-3 sm:grid-cols-[1fr_auto_auto]"
+                                            >
+                                                <Controller
+                                                    name={`extras.${index}.extra_product_id`}
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field
+                                                            data-invalid={
+                                                                fieldState.invalid ||
+                                                                Boolean(extraProductError)
+                                                            }
+                                                        >
+                                                            <Select
+                                                                value={field.value}
+                                                                onValueChange={field.onChange}
+                                                            >
+                                                                <SelectTrigger
+                                                                    className="w-full"
+                                                                    aria-invalid={
+                                                                        fieldState.invalid ||
+                                                                        Boolean(extraProductError)
+                                                                    }
+                                                                >
+                                                                    <SelectValue placeholder="Seleccionar producto" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {activeExtraProducts.map(
+                                                                        (product) => (
+                                                                            <SelectItem
+                                                                                key={product.id}
+                                                                                value={product.id}
+                                                                                disabled={disabledIds.has(
+                                                                                    product.id,
+                                                                                )}
+                                                                            >
+                                                                                {product.name}
+                                                                            </SelectItem>
+                                                                        ),
+                                                                    )}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {fieldState.invalid && (
+                                                                <FieldError
+                                                                    errors={[fieldState.error]}
+                                                                />
+                                                            )}
+                                                        </Field>
+                                                    )}
+                                                />
+
+                                                <Controller
+                                                    name={`extras.${index}.quantity`}
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field data-invalid={fieldState.invalid}>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="icon-sm"
+                                                                    onClick={() =>
+                                                                        field.onChange(
+                                                                            Math.max(
+                                                                                1,
+                                                                                Number(field.value) -
+                                                                                    1,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    aria-label="Disminuir cantidad"
+                                                                >
+                                                                    <Minus className="size-3.5" />
+                                                                </Button>
+                                                                <Input
+                                                                    type="number"
+                                                                    min={1}
+                                                                    value={field.value}
+                                                                    onChange={(event) =>
+                                                                        field.onChange(
+                                                                            Number(
+                                                                                event.target
+                                                                                    .value || 1,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    className="h-8 w-16 text-center"
+                                                                    aria-label="Cantidad"
+                                                                />
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="icon-sm"
+                                                                    onClick={() =>
+                                                                        field.onChange(
+                                                                            Number(field.value) + 1,
+                                                                        )
+                                                                    }
+                                                                    aria-label="Aumentar cantidad"
+                                                                >
+                                                                    <Plus className="size-3.5" />
+                                                                </Button>
+                                                            </div>
+                                                            {fieldState.invalid && (
+                                                                <FieldError
+                                                                    errors={[fieldState.error]}
+                                                                />
+                                                            )}
+                                                        </Field>
+                                                    )}
+                                                />
+
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                    onClick={() => removeExtra(index)}
+                                                    aria-label="Eliminar producto"
+                                                    className="justify-self-start text-muted-foreground hover:text-destructive sm:justify-self-end"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })
+                                )}
                             </div>
                         </Field>
                     </FieldGroup>

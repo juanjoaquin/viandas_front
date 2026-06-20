@@ -8,6 +8,7 @@ import {
     TFulfillmentType,
 } from "@/src/architecture/core/domain/entities/DailyProduction";
 import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
+import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
 import { DailyProductionRowActions } from "./daily-production-row-actions";
 
@@ -26,6 +27,7 @@ const fulfillmentVariants: Record<TFulfillmentType, "warning" | "info" | "succes
 function getColumns(
     menuTypes: TMenuType[],
     deliveries: TDelivery[],
+    extraProducts: TExtraProduct[],
 ): ColumnDef<TDailyProduction>[] {
     return [{
         key: "customer",
@@ -48,32 +50,64 @@ function getColumns(
         header: "Menús",
         cell: (row) =>
             row.lines && row.lines.length > 0 ? (
-                <div className="divide-y divide-border/50">
-                    {row.lines.map((line) => (
-                        <div
-                            key={line.id}
-                            className="flex items-center gap-2  first:pt-0 last:pb-0"
-                        >
-                            <span className="min-w-0 truncate text-sm font-semibold">
-                                {line.menu_type?.name ?? "Sin tipo"}
-                            </span>
-                            <span
-                                className="shrink-0 text-sm text-muted-foreground"
-                                aria-hidden
+                <div className="min-w-40 divide-y divide-border/50">
+                    {row.lines.map((line) => {
+                        const menuName = line.menu_type?.name ?? "Sin tipo";
+
+                        return (
+                            <div
+                                key={line.id}
+                                className="grid grid-cols-[1fr_auto] items-center gap-x-3 py-1.5 first:pt-0 last:pb-0"
+                                aria-label={`${menuName}, cantidad ${line.quantity}`}
                             >
-                                x
-                            </span>
-                            <Badge
-                                variant="default"
-                                className="w-8 shrink-0 justify-center rounded-md px-1.5 py-0 text-lg font-bold tabular-nums"
-                            >
-                                {line.quantity}
-                            </Badge>
-                        </div>
-                    ))}
+                                <span className="min-w-0 truncate text-sm font-semibold">
+                                    {menuName}
+                                </span>
+                                <Badge
+                                    variant="default"
+                                    className="w-9 shrink-0 justify-center rounded-md px-1.5 py-0 text-lg font-bold tabular-nums"
+                                >
+                                    {line.quantity}
+                                </Badge>
+                            </div>
+                        );
+                    })}
                 </div>
             ) : (
                 <span className="text-muted-foreground">Sin líneas</span>
+            ),
+    },
+    {
+        key: "extras",
+        header: "Productos",
+        cell: (row) =>
+            row.extras && row.extras.length > 0 ? (
+                <div className="min-w-40 divide-y divide-border/50">
+                    {row.extras.map((extra) => {
+                        const productName =
+                            extra.extra_product?.name ?? "Sin producto";
+
+                        return (
+                            <div
+                                key={extra.id}
+                                className="grid grid-cols-[1fr_auto] items-center gap-x-3 py-1.5 first:pt-0 last:pb-0"
+                                aria-label={`${productName}, cantidad ${extra.quantity}`}
+                            >
+                                <span className="min-w-0 truncate text-sm font-semibold">
+                                    {productName}
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="w-9 shrink-0 justify-center rounded-md px-1.5 py-0 text-lg font-bold tabular-nums"
+                                >
+                                    {extra.quantity}
+                                </Badge>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <span className="text-muted-foreground">Sin productos</span>
             ),
     },
     {
@@ -124,6 +158,7 @@ function getColumns(
                 production={row}
                 menuTypes={menuTypes}
                 deliveries={deliveries}
+                extraProducts={extraProducts}
             />
         ),
     }];
@@ -133,6 +168,7 @@ type DailyProductionsTableProps = {
     productions: TDailyProduction[];
     menuTypes: TMenuType[];
     deliveries: TDelivery[];
+    extraProducts: TExtraProduct[];
     filters?: TDailyProductionFilters;
 };
 
@@ -140,6 +176,7 @@ export function DailyProductionsTable({
     productions,
     menuTypes,
     deliveries,
+    extraProducts,
     filters,
 }: DailyProductionsTableProps) {
     const hasFilters = Boolean(
@@ -151,7 +188,7 @@ export function DailyProductionsTable({
 
     return (
         <DataTable
-            columns={getColumns(menuTypes, deliveries)}
+            columns={getColumns(menuTypes, deliveries, extraProducts)}
             data={productions}
             emptyMessage={
                 hasFilters ? "Sin coincidencias" : "Sin producciones para este día"

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getAllDeliveriesAction } from "@/src/architecture/actions/delivery/get-all-deliveries.action";
+import { getAllExtraProductsAction } from "@/src/architecture/actions/extra-product/get-all-extra-products.action";
 import { getAllMenuTypesAction } from "@/src/architecture/actions/menu-type/get-all-menu-types.action";
 import {
     dailyProductionSortOptions,
@@ -95,13 +96,17 @@ export default async function ProduccionesPage({
     const selectedDate = normalizeDate(date);
     const filters = normalizeFilters(params);
 
-    const [menuTypesResult, deliveriesResult] = await Promise.all([
+    const [menuTypesResult, deliveriesResult, extraProductsResult] = await Promise.all([
         getAllMenuTypesAction(),
         getAllDeliveriesAction(),
+        getAllExtraProductsAction(),
     ]);
 
     const menuTypes = menuTypesResult.success ? (menuTypesResult.data ?? []) : [];
     const deliveries = deliveriesResult.success ? (deliveriesResult.data ?? []) : [];
+    const extraProducts = extraProductsResult.success
+        ? (extraProductsResult.data ?? [])
+        : [];
 
     return (
         <>
@@ -113,6 +118,7 @@ export default async function ProduccionesPage({
                         initialDate={selectedDate}
                         menuTypes={menuTypes}
                         deliveries={deliveries}
+                        extraProducts={extraProducts}
                     />
                 }
             />

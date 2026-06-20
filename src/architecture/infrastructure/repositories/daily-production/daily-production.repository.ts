@@ -1,11 +1,15 @@
 import { Result } from "@/src/libs/result";
 import {
+    AddDailyProductionExtraInput,
     CreateDailyProductionPayload,
     TDailyProduction,
+    TDailyProductionExtra,
     TDailyProductionFilters,
     TDailyProductionLine,
     TKitchenTotals,
+    TExtrasTotals,
     UpdateDailyProductionPayload,
+    UpdateDailyProductionExtraInput,
     UpsertDailyProductionLineInput,
 } from "@/src/architecture/core/domain/entities/DailyProduction";
 import { IDailyProductionRepository } from "@/src/architecture/core/domain/repository/daily-production/i-daily-production.repository";
@@ -51,6 +55,17 @@ export class DailyProductionRepository implements IDailyProductionRepository {
         );
     }
 
+    async getExtrasTotals(date: string): Promise<Result<TExtrasTotals>> {
+        const params = new URLSearchParams({ date });
+
+        return await this.httpClient.get<TExtrasTotals>(
+            `daily-productions/totals/extras?${params.toString()}`,
+            {
+                tags: ["daily-productions", `daily-productions-${date}`],
+            },
+        );
+    }
+
     async update(data: UpdateDailyProductionPayload): Promise<Result<void>> {
         return await this.httpClient.put<void>("daily-productions", data);
     }
@@ -72,6 +87,36 @@ export class DailyProductionRepository implements IDailyProductionRepository {
     async deleteLine(dailyProductionId: string, lineId: string): Promise<Result<void>> {
         return await this.httpClient.delete<void>(
             `daily-productions/${dailyProductionId}/lines/${lineId}`,
+        );
+    }
+
+    async addExtra(
+        dailyProductionId: string,
+        data: AddDailyProductionExtraInput,
+    ): Promise<Result<TDailyProductionExtra>> {
+        return await this.httpClient.post<TDailyProductionExtra>(
+            `daily-productions/${dailyProductionId}/extras`,
+            data,
+        );
+    }
+
+    async updateExtra(
+        dailyProductionId: string,
+        extraId: string,
+        data: UpdateDailyProductionExtraInput,
+    ): Promise<Result<TDailyProductionExtra>> {
+        return await this.httpClient.put<TDailyProductionExtra>(
+            `daily-productions/${dailyProductionId}/extras/${extraId}`,
+            data,
+        );
+    }
+
+    async deleteExtra(
+        dailyProductionId: string,
+        extraId: string,
+    ): Promise<Result<void>> {
+        return await this.httpClient.delete<void>(
+            `daily-productions/${dailyProductionId}/extras/${extraId}`,
         );
     }
 }

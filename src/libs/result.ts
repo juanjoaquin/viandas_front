@@ -4,6 +4,7 @@ export type ErrorCode =
   | "FORBIDDEN"
   | "VALIDATION"
   | "CONFLICT"
+  | "PARTIAL"
   | "TIMEOUT"
   | "UNKNOWN";
 
