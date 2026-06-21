@@ -1,3 +1,4 @@
+import { Paginated } from "../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { IDishRepository } from "../core/domain/repository/dish/i-dish.repository";
 import { CreateDishInput, TDish, UpdateDishInput } from "../core/domain/entities/Dish";
@@ -14,7 +15,7 @@ export class DishController {
 
     async getAllDishes(
         filters?: GetDishesFilters,
-    ): Promise<Result<TDish[]>> {
+    ): Promise<Result<Paginated<TDish>>> {
         try {
             const result = await getAllDishesUseCase(
                 this.repository,

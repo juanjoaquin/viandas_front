@@ -72,7 +72,7 @@ export function proxy(request: NextRequest) {
     isAuthenticated &&
     isPublicRoute(pathname)
   ) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/overview", request.url));
   }
 
   const response = NextResponse.next();

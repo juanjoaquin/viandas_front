@@ -1,9 +1,10 @@
 import { Result } from "@/src/libs/result";
+import { Paginated } from "../../pagination";
 import { CreateDeliveryInput, TDelivery, UpdateDeliveryInput } from "../../entities/Delivery";
 import { GetDeliveriesFilters } from "../../delivery/get-deliveries-filters";
 
 export interface IDeliveryRepository {
-    getAll(filters?: GetDeliveriesFilters): Promise<Result<TDelivery[]>>;
+    getAll(filters?: GetDeliveriesFilters): Promise<Result<Paginated<TDelivery>>>;
     getById(id: string): Promise<Result<TDelivery>>;
     create(data: CreateDeliveryInput): Promise<Result<TDelivery>>;
     update(id: string, data: UpdateDeliveryInput): Promise<Result<void>>;

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { DEFAULT_PAGE_LIMIT } from "@/src/architecture/core/domain/pagination";
 import { getAllCustomersAction } from "@/src/architecture/actions/customer/get-all-customers.action";
 import { TCustomer } from "@/src/architecture/core/domain/entities/Customer";
 
@@ -52,15 +53,28 @@ export function CustomerSearchInput({
     useEffect(() => {
         if (!isOpen) return;
 
+        const trimmedQuery = query.trim();
+
         const timeout = setTimeout(() => {
             setIsLoading(true);
 
-            const trimmedQuery = query.trim();
+            const filters = {
+                page: 1,
+                limit: DEFAULT_PAGE_LIMIT,
+                ...(trimmedQuery ? { q: trimmedQuery } : {}),
+            };
 
-            getAllCustomersAction(trimmedQuery ? { q: trimmedQuery } : undefined)
+            console.log("[CustomerSearchInput] GET customers", filters);
+
+            getAllCustomersAction(filters)
                 .then((result) => {
                     if (result.success) {
-                        setResults(result.data ?? []);
+                        const items = result.data?.items ?? [];
+                        console.log("[CustomerSearchInput] GET customers OK", {
+                            recibidos: items.length,
+                            meta: result.data?.meta,
+                        });
+                        setResults(items);
                     } else {
                         setResults([]);
                     }
@@ -70,7 +84,7 @@ export function CustomerSearchInput({
                     setIsLoading(false);
                     setHasSearched(true);
                 });
-        }, SEARCH_DEBOUNCE_MS);
+        }, trimmedQuery ? SEARCH_DEBOUNCE_MS : 0);
 
         return () => clearTimeout(timeout);
     }, [query, isOpen]);

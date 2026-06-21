@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { TDish } from "@/src/architecture/core/domain/entities/Dish";
+import { DEFAULT_PAGE_LIMIT } from "@/src/architecture/core/domain/pagination";
 import { getAllDishesAction } from "@/src/architecture/actions/dish/get-all-dishes.action";
 import { cn } from "@/lib/utils";
 
@@ -50,18 +51,20 @@ export function DishSearchInput({
     useEffect(() => {
         if (!menuTypeId || !isOpen) return;
 
+        const trimmedQuery = query.trim();
+
         const timeout = setTimeout(() => {
             setIsLoading(true);
 
-            const trimmedQuery = query.trim();
-
             getAllDishesAction({
                 menu_type_id: menuTypeId,
+                page: 1,
+                limit: DEFAULT_PAGE_LIMIT,
                 ...(trimmedQuery ? { q: trimmedQuery } : {}),
             })
                 .then((result) => {
                     if (result.success) {
-                        setResults(result.data ?? []);
+                        setResults(result.data?.items ?? []);
                     } else {
                         setResults([]);
                     }
@@ -71,7 +74,7 @@ export function DishSearchInput({
                     setIsLoading(false);
                     setHasSearched(true);
                 });
-        }, SEARCH_DEBOUNCE_MS);
+        }, trimmedQuery ? SEARCH_DEBOUNCE_MS : 0);
 
         return () => clearTimeout(timeout);
     }, [menuTypeId, query, isOpen]);

@@ -3,12 +3,14 @@
 import { Briefcase, User } from "lucide-react";
 import { TCustomer } from "@/src/architecture/core/domain/entities/Customer";
 import { CustomerType } from "@/src/architecture/core/domain/customer/get-customers-filters";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 import { getCustomerTypeLabel } from "@/src/architecture/core/domain/customer/customer-type";
 import { ColumnDef, DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "../../../../components/custom/search-input";
 import { CustomersTypeToggle } from "./customers-type-toggle";
 import { CustomerID } from "./customer-id";
+import { useTablePagination } from "@/hooks/use-table-pagination";
 
 type BadgeVariant = "success" | "info" | "warning" | "secondary";
 
@@ -82,6 +84,12 @@ const columns: ColumnDef<TCustomer>[] = [
       ) : (
         <span className="text-muted-foreground">—</span>
       ),
+    mobileCell: (row) =>
+      row.address ? (
+        <span className="text-sm">{row.address}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
   },
   {
     key: "actions",
@@ -94,20 +102,25 @@ const columns: ColumnDef<TCustomer>[] = [
 
 type CustomersTableProps = {
   customers: TCustomer[];
+  meta?: PaginationMeta;
   q?: string;
   type?: string;
 };
 
-export function CustomersTable({ customers, q, type }: CustomersTableProps) {
+export function CustomersTable({ customers, meta, q, type }: CustomersTableProps) {
+  const { goToPage } = useTablePagination();
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs md:flex-row md:flex-wrap md:items-center">
         <CustomersTypeToggle type={type} />
-        <SearchInput q={q} />
+        <SearchInput q={q} className="w-full md:w-64" />
       </div>
       <DataTable
         columns={columns}
         data={customers}
+        meta={meta}
+        onPageChange={goToPage}
         emptyMessage={q || type ? "Sin coincidencias" : "Sin clientes"}
         emptyDescription={
           q || type

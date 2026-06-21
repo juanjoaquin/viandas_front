@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { DishController } from "../../controllers/dish.controller";
@@ -11,7 +12,7 @@ import { DishRepository } from "../../infrastructure/repositories/dish/dish.repo
 
 export async function getAllDishesAction(
     filters?: GetDishesFilters,
-): Promise<Result<TDish[]>> {
+): Promise<Result<Paginated<TDish>>> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {

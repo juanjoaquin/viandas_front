@@ -1,3 +1,4 @@
+import { Paginated } from "../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { IProductCategoryRepository } from "../core/domain/repository/product-category/i-product-category.repository";
 import {
@@ -18,7 +19,7 @@ export class ProductCategoryController {
 
     async getAllProductCategories(
         filters?: GetProductCategoriesFilters,
-    ): Promise<Result<TProductCategory[]>> {
+    ): Promise<Result<Paginated<TProductCategory>>> {
         try {
             const result = await getAllProductCategoriesUseCase(
                 this.repository,

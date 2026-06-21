@@ -7,10 +7,9 @@ import {
     TDailyProductionFilters,
     TFulfillmentType,
 } from "@/src/architecture/core/domain/entities/DailyProduction";
-import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
-import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
-import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 import { DailyProductionRowActions } from "./daily-production-row-actions";
+import { useTablePagination } from "@/hooks/use-table-pagination";
 
 const fulfillmentLabels: Record<TFulfillmentType, string> = {
     PENDING: "Pendiente",
@@ -24,11 +23,7 @@ const fulfillmentVariants: Record<TFulfillmentType, "warning" | "info" | "succes
     PICKUP: "success",
 };
 
-function getColumns(
-    menuTypes: TMenuType[],
-    deliveries: TDelivery[],
-    extraProducts: TExtraProduct[],
-): ColumnDef<TDailyProduction>[] {
+function getColumns(): ColumnDef<TDailyProduction>[] {
     return [{
         key: "customer",
         header: "Cliente",
@@ -147,36 +142,31 @@ function getColumns(
             ) : (
                 <span className="text-muted-foreground">—</span>
             ),
+        mobileCell: (row) =>
+            row.notes ? (
+                <span className="text-sm">{row.notes}</span>
+            ) : (
+                <span className="text-muted-foreground">—</span>
+            ),
     },
     {
         key: "actions",
         header: "Acciones",
         headerClassName: "w-[1%] text-right",
         cellClassName: "w-[1%] text-right",
-        cell: (row) => (
-            <DailyProductionRowActions
-                production={row}
-                menuTypes={menuTypes}
-                deliveries={deliveries}
-                extraProducts={extraProducts}
-            />
-        ),
+        cell: (row) => <DailyProductionRowActions production={row} />,
     }];
 }
 
 type DailyProductionsTableProps = {
     productions: TDailyProduction[];
-    menuTypes: TMenuType[];
-    deliveries: TDelivery[];
-    extraProducts: TExtraProduct[];
+    meta?: PaginationMeta;
     filters?: TDailyProductionFilters;
 };
 
 export function DailyProductionsTable({
     productions,
-    menuTypes,
-    deliveries,
-    extraProducts,
+    meta,
     filters,
 }: DailyProductionsTableProps) {
     const hasFilters = Boolean(
@@ -185,11 +175,14 @@ export function DailyProductionsTable({
             filters?.menu_type_id ||
             filters?.delivery_id,
     );
+    const { goToPage } = useTablePagination();
 
     return (
         <DataTable
-            columns={getColumns(menuTypes, deliveries, extraProducts)}
+            columns={getColumns()}
             data={productions}
+            meta={meta}
+            onPageChange={goToPage}
             emptyMessage={
                 hasFilters ? "Sin coincidencias" : "Sin producciones para este día"
             }

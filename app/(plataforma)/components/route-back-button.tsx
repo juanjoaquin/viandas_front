@@ -16,7 +16,11 @@ function getCanGoBack() {
   return typeof idx === "number" ? idx > 0 : window.history.length > 1;
 }
 
-export function RouteBackButton() {
+type RouteBackButtonProps = {
+  showSeparator?: boolean;
+};
+
+export function RouteBackButton({ showSeparator = true }: RouteBackButtonProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [canGoBack, setCanGoBack] = useState(false);
@@ -49,7 +53,9 @@ export function RouteBackButton() {
         </TooltipTrigger>
         <TooltipContent side="bottom">Volver atrás</TooltipContent>
       </Tooltip>
-      <Separator orientation="vertical" className="h-9" />
+      {showSeparator && (
+        <Separator orientation="vertical" className="hidden h-9 md:block" />
+      )}
     </>
   );
 }

@@ -12,7 +12,7 @@ export type TDish = {
 
 export const createDishInputSchema = z.object({
     name: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres"),
-    description: z.string().trim().min(2, "La descripción debe tener al menos 2 caracteres"),
+    description: z.string().trim(),
     menu_type_id: z.string().uuid("Debe seleccionar un tipo de menú válido"),
 });
 
@@ -20,7 +20,7 @@ export type CreateDishInput = z.infer<typeof createDishInputSchema>;
 
 export const updateDishInputSchema = z.object({
     name: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres"),
-    description: z.string().trim().min(2, "La descripción debe tener al menos 2 caracteres"),
+    description: z.string().trim(),
     menu_type_id: z.string().uuid("Debe seleccionar un tipo de menú válido"),
     active: z.boolean(),
 });

@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { ExtraProductController } from "../../controllers/extra-product.controller";
@@ -11,7 +12,7 @@ import { ExtraProductRepository } from "../../infrastructure/repositories/extra-
 
 export async function getAllExtraProductsAction(
     filters?: GetExtraProductsFilters,
-): Promise<Result<TExtraProduct[]>> {
+): Promise<Result<Paginated<TExtraProduct>>> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {

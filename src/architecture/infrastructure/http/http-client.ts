@@ -1,4 +1,5 @@
 import { Err, Success, type Result } from "@/src/libs/result";
+import type { Paginated } from "@/src/architecture/core/domain/pagination";
 import { Logger, setLogContext } from "@/src/architecture/infrastructure/logger/logger";
 import { toFetchInit } from "./fetch-adapter";
 import { toHttpError, toNetworkError } from "./http-errors";
@@ -35,6 +36,13 @@ export class HttpClient implements IHttpClient {
     return this.request<T>("GET", endpoint, undefined, options);
   }
 
+  getPaginated<T>(
+    endpoint: string,
+    options?: HttpRequestOptions,
+  ): Promise<Result<Paginated<T>>> {
+    return this.requestPaginated<T>("GET", endpoint, undefined, options);
+  }
+
   post<T>(
     endpoint: string,
     body: unknown,
@@ -63,6 +71,76 @@ export class HttpClient implements IHttpClient {
       allowNull: true,
       ...options,
     });
+  }
+
+  private async requestPaginated<T>(
+    method: string,
+    endpoint: string,
+    body?: unknown,
+    options: HttpRequestOptions = {},
+  ): Promise<Result<Paginated<T>>> {
+    const { allowNull, init } = toFetchInit(options);
+    const url = `${this.baseUrl}${normalizeEndpoint(endpoint)}`;
+    const token = (await this.getAuthToken?.()) ?? null;
+    const hasAccessToken = Boolean(token);
+
+    const requestContext = {
+      method,
+      endpoint,
+      url,
+      hasAccessToken,
+      ...(options.tags && { tags: options.tags }),
+    };
+
+    setLogContext(requestContext);
+
+    try {
+      const response = await fetch(url, {
+        ...init,
+        method,
+        headers: this.buildHeaders(init.headers, body, token),
+        ...(body !== undefined && { body: JSON.stringify(body) }),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+
+      if (!response.ok) {
+        const result = await toHttpError(response);
+        if (!result.success) {
+          Logger.error("[HTTP] Request failed", {
+            ...requestContext,
+            status: response.status,
+            error: result.error,
+            code: result.code,
+          });
+        }
+        return result;
+      }
+
+      const json = (await response.json()) as BackendResponse<T[]>;
+
+      if (!allowNull && (json.data === null || json.data === undefined)) {
+        return Err("Respuesta del servidor sin datos", "UNKNOWN");
+      }
+
+      if (!json.meta) {
+        return Err("Respuesta del servidor sin meta de paginación", "UNKNOWN");
+      }
+
+      return Success({
+        items: (json.data ?? []) as T[],
+        meta: json.meta,
+      });
+    } catch (error) {
+      const result = toNetworkError(error);
+      if (!result.success) {
+        Logger.error("[HTTP] Network error", {
+          ...requestContext,
+          error: result.error,
+          code: result.code,
+        });
+      }
+      return result;
+    }
   }
 
   private async request<T>(

@@ -1,3 +1,4 @@
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 import {
     AddDailyProductionExtraInput,
@@ -21,7 +22,7 @@ export class DailyProductionRepository implements IDailyProductionRepository {
     async getByDate(
         date: string,
         filters?: TDailyProductionFilters,
-    ): Promise<Result<TDailyProduction[]>> {
+    ): Promise<Result<Paginated<TDailyProduction>>> {
         const params = new URLSearchParams({ date });
         if (filters?.q) params.set("q", filters.q);
         if (filters?.fulfillment_type) {
@@ -31,8 +32,9 @@ export class DailyProductionRepository implements IDailyProductionRepository {
         if (filters?.delivery_id) params.set("delivery_id", filters.delivery_id);
         if (filters?.sort) params.set("sort", filters.sort);
         if (filters?.order) params.set("order", filters.order);
+        appendPaginationParams(params, filters);
 
-        return await this.httpClient.get<TDailyProduction[]>(
+        return await this.httpClient.getPaginated<TDailyProduction>(
             `daily-productions?${params.toString()}`,
             {
                 tags: ["daily-productions", `daily-productions-${date}`],

@@ -1,3 +1,4 @@
+import { Paginated } from "../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import {
     CreateExtraProductInput,
@@ -18,7 +19,7 @@ export class ExtraProductController {
 
     async getAllExtraProducts(
         filters?: GetExtraProductsFilters,
-    ): Promise<Result<TExtraProduct[]>> {
+    ): Promise<Result<Paginated<TExtraProduct>>> {
         try {
             const result = await getAllExtraProductsUseCase(
                 this.repository,

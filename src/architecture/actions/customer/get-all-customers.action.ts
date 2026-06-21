@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { TCustomer } from "../../core/domain/entities/Customer";
 import { GetCustomersFilters } from "../../core/domain/customer/get-customers-filters";
 import { Err, Result } from "@/src/libs/result";
@@ -9,7 +10,7 @@ import { CustomerController } from "../../controllers/customer.controller";
 import { createHttpClient } from "../../infrastructure/http/api-config";
 import { getAccessToken } from "@/src/libs/token";
 
-export async function getAllCustomersAction(filters?: GetCustomersFilters): Promise<Result<TCustomer[]>> {
+export async function getAllCustomersAction(filters?: GetCustomersFilters): Promise<Result<Paginated<TCustomer>>> {
     const accessToken = await getAccessToken();
     
     if (!accessToken) {

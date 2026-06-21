@@ -2,18 +2,20 @@ import { IDeliveryRepository } from "@/src/architecture/core/domain/repository/d
 import { GetDeliveriesFilters } from "@/src/architecture/core/domain/delivery/get-deliveries-filters";
 import { HttpClient } from "../../http";
 import { CreateDeliveryInput, TDelivery, UpdateDeliveryInput } from "@/src/architecture/core/domain/entities/Delivery";
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 
 export class DeliveryRepository implements IDeliveryRepository {
     constructor(private readonly httpClient: HttpClient) { }
 
-    async getAll(filters?: GetDeliveriesFilters): Promise<Result<TDelivery[]>> {
+    async getAll(filters?: GetDeliveriesFilters): Promise<Result<Paginated<TDelivery>>> {
         const params = new URLSearchParams();
         if (filters?.q) params.set("q", filters.q);
+        appendPaginationParams(params, filters);
         const qs = params.toString();
         const endpoint = qs ? `deliveries?${qs}` : "deliveries";
 
-        return await this.httpClient.get<TDelivery[]>(endpoint, {
+        return await this.httpClient.getPaginated<TDelivery>(endpoint, {
             tags: ["deliveries"],
         });
     }

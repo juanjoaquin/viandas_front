@@ -25,7 +25,7 @@ export default function LoginPage() {
     startTransition(async () => {
       const result = await loginAction(data);
       if (result.success) {
-        router.push("/dashboard");
+        router.push("/overview");
       } else {
         if (result.code === "VALIDATION") {
           setFieldErrors({ email: result.error });

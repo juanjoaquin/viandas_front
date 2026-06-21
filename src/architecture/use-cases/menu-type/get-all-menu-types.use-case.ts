@@ -1,3 +1,4 @@
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { TMenuType } from "../../core/domain/entities/MenuType";
 import {
@@ -10,7 +11,7 @@ import { Logger } from "../../infrastructure/logger/logger";
 export async function getAllMenuTypesUseCase(
     repository: IMenuTypeRepository,
     filters?: GetMenuTypesFilters,
-): Promise<Result<TMenuType[]>> {
+): Promise<Result<Paginated<TMenuType>>> {
     try {
         const result = await repository.getAll(
             normalizeGetMenuTypesFilters(filters),

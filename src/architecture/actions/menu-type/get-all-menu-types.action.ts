@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { MenuTypeController } from "../../controllers/menu-type.controller";
@@ -11,7 +12,7 @@ import { MenuTypeRepository } from "../../infrastructure/repositories/menu-type/
 
 export async function getAllMenuTypesAction(
     filters?: GetMenuTypesFilters,
-): Promise<Result<TMenuType[]>> {
+): Promise<Result<Paginated<TMenuType>>> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {

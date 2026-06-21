@@ -30,7 +30,7 @@ export function ProductionDateSelector({ date }: ProductionDateSelectorProps) {
     }
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 md:w-auto">
             <Button
                 type="button"
                 variant="outline"
@@ -45,7 +45,7 @@ export function ProductionDateSelector({ date }: ProductionDateSelectorProps) {
                 type="date"
                 value={date}
                 onChange={(event) => navigate(event.target.value)}
-                className="h-8 w-40"
+                className="h-8 w-full flex-1 md:w-40 md:flex-none"
                 aria-label="Filtrar por fecha"
             />
 

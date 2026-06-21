@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { ColumnDef, DataTable } from "@/components/ui/data-table";
 import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { TProductCategory } from "@/src/architecture/core/domain/entities/ProductCategory";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 import { SearchInput } from "../../../../components/custom/search-input";
 import { ExtraProductID } from "./extra-product-id";
+import { useTablePagination } from "@/hooks/use-table-pagination";
 
 function CategoryBadge({ category }: { category?: TProductCategory | null }) {
     return (
@@ -80,25 +82,12 @@ const columns: ColumnDef<TExtraProduct>[] = [
 
 type ExtraProductsTableProps = {
     products: TExtraProduct[];
-    categories: TProductCategory[];
+    meta?: PaginationMeta;
     q?: string;
 };
 
-export function ExtraProductsTable({
-    products,
-    categories,
-    q,
-}: ExtraProductsTableProps) {
-    const columnsWithActions: ColumnDef<TExtraProduct>[] = columns.map((column) =>
-        column.key === "actions"
-            ? {
-                  ...column,
-                  cell: (row) => (
-                      <ExtraProductID product={row} categories={categories} />
-                  ),
-              }
-            : column,
-    );
+export function ExtraProductsTable({ products, meta, q }: ExtraProductsTableProps) {
+    const { goToPage } = useTablePagination();
 
     return (
         <div className="space-y-4">
@@ -106,8 +95,10 @@ export function ExtraProductsTable({
                 <SearchInput q={q} />
             </div>
             <DataTable
-                columns={columnsWithActions}
+                columns={columns}
                 data={products}
+                meta={meta}
+                onPageChange={goToPage}
                 emptyMessage={q ? "Sin coincidencias" : "Sin productos"}
                 emptyDescription={
                     q

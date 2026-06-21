@@ -6,6 +6,7 @@ import {
 } from "@/src/architecture/core/domain/entities/ProductCategory";
 import { GetProductCategoriesFilters } from "@/src/architecture/core/domain/product-category/get-product-categories-filters";
 import { HttpClient } from "../../http";
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 
 export class ProductCategoryRepository implements IProductCategoryRepository {
@@ -13,16 +14,17 @@ export class ProductCategoryRepository implements IProductCategoryRepository {
 
     async getAll(
         filters?: GetProductCategoriesFilters,
-    ): Promise<Result<TProductCategory[]>> {
+    ): Promise<Result<Paginated<TProductCategory>>> {
         const params = new URLSearchParams();
         if (filters?.q) params.set("q", filters.q);
         if (filters?.active !== undefined) {
             params.set("active", String(filters.active));
         }
+        appendPaginationParams(params, filters);
         const qs = params.toString();
         const endpoint = qs ? `product-categories?${qs}` : "product-categories";
 
-        return await this.httpClient.get<TProductCategory[]>(endpoint, {
+        return await this.httpClient.getPaginated<TProductCategory>(endpoint, {
             tags: ["product-categories"],
         });
     }

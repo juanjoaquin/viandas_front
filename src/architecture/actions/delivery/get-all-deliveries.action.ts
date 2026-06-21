@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { DeliveryController } from "../../controllers/delivery.controller";
@@ -11,7 +12,7 @@ import { DeliveryRepository } from "../../infrastructure/repositories/delivery/d
 
 export async function getAllDeliveriesAction(
     filters?: GetDeliveriesFilters,
-): Promise<Result<TDelivery[]>> {
+): Promise<Result<Paginated<TDelivery>>> {
     const accessToken = await getAccessToken();
     
     if (!accessToken) {

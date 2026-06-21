@@ -5,11 +5,11 @@ import { CreateCustomerDialog } from "./components/create-customer-dialog";
 import { PageHeader } from "../components/page-header";
 
 type ClientesPageProps = {
-  searchParams: Promise<{ q?: string; type?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; page?: string; limit?: string }>;
 };
 
 export default async function ClientesPage({ searchParams }: ClientesPageProps) {
-  const { q, type } = await searchParams;
+  const { q, type, page, limit } = await searchParams;
 
   return (
     <>
@@ -20,7 +20,7 @@ export default async function ClientesPage({ searchParams }: ClientesPageProps) 
       />
       <div className="flex flex-col gap-4 p-6">
         <Suspense fallback={<CustomersTableSkeleton />}>
-          <CustomersTableData q={q} type={type} />
+          <CustomersTableData q={q} type={type} page={page} limit={limit} />
         </Suspense>
       </div>
     </>

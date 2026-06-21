@@ -6,21 +6,23 @@ import {
 } from "@/src/architecture/core/domain/entities/MenuType";
 import { GetMenuTypesFilters } from "@/src/architecture/core/domain/menu-type/get-menu-types-filters";
 import { HttpClient } from "../../http";
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 
 export class MenuTypeRepository implements IMenuTypeRepository {
     constructor(private readonly httpClient: HttpClient) {}
 
-    async getAll(filters?: GetMenuTypesFilters): Promise<Result<TMenuType[]>> {
+    async getAll(filters?: GetMenuTypesFilters): Promise<Result<Paginated<TMenuType>>> {
         const params = new URLSearchParams();
         if (filters?.q) params.set("q", filters.q);
         if (filters?.active !== undefined) {
             params.set("active", String(filters.active));
         }
+        appendPaginationParams(params, filters);
         const qs = params.toString();
         const endpoint = qs ? `menu-types?${qs}` : "menu-types";
 
-        return await this.httpClient.get<TMenuType[]>(endpoint, {
+        return await this.httpClient.getPaginated<TMenuType>(endpoint, {
             tags: ["menu-types"],
         });
     }

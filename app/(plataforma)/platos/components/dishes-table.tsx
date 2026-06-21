@@ -4,10 +4,11 @@ import { Check, X } from "lucide-react";
 import { ColumnDef, DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { TDish } from "@/src/architecture/core/domain/entities/Dish";
-import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 import { SearchInput } from "../../../../components/custom/search-input";
 import { DishID } from "./dish-id";
 import { DishesMenuTypeSelect } from "./dishes-menu-type-select";
+import { useTablePagination } from "@/hooks/use-table-pagination";
 
 function MenuTypeBadge({ name }: { name: string }) {
     return (
@@ -33,7 +34,7 @@ function ActiveBadge({ active }: { active: boolean }) {
     );
 }
 
-function getColumns(menuTypes: TMenuType[]): ColumnDef<TDish>[] {
+function getColumns(): ColumnDef<TDish>[] {
     return [
         {
             key: "name",
@@ -49,6 +50,11 @@ function getColumns(menuTypes: TMenuType[]): ColumnDef<TDish>[] {
             header: "Descripción",
             cell: (row) => (
                 <p className="max-w-xs truncate text-sm text-muted-foreground">
+                    {row.description || "—"}
+                </p>
+            ),
+            mobileCell: (row) => (
+                <p className="text-sm text-muted-foreground">
                     {row.description || "—"}
                 </p>
             ),
@@ -73,30 +79,33 @@ function getColumns(menuTypes: TMenuType[]): ColumnDef<TDish>[] {
             header: "Acciones",
             headerClassName: "w-[1%] text-right",
             cellClassName: "w-[1%] text-right",
-            cell: (row) => <DishID dish={row} menuTypes={menuTypes} />,
+            cell: (row) => <DishID dish={row} />,
         },
     ];
 }
 
 type DishesTableProps = {
     dishes: TDish[];
-    menuTypes: TMenuType[];
+    meta?: PaginationMeta;
     q?: string;
     menuTypeId?: string;
 };
 
-export function DishesTable({ dishes, menuTypes, q, menuTypeId }: DishesTableProps) {
+export function DishesTable({ dishes, meta, q, menuTypeId }: DishesTableProps) {
     const hasFilters = Boolean(q || menuTypeId);
+    const { goToPage } = useTablePagination();
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs">
-                <DishesMenuTypeSelect menuTypes={menuTypes} menuTypeId={menuTypeId} />
-                <SearchInput q={q} />
+            <div className="flex flex-col gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs md:flex-row md:flex-wrap md:items-center">
+                <DishesMenuTypeSelect menuTypeId={menuTypeId} />
+                <SearchInput q={q} className="w-full md:w-64" />
             </div>
             <DataTable
-                columns={getColumns(menuTypes)}
+                columns={getColumns()}
                 data={dishes}
+                meta={meta}
+                onPageChange={goToPage}
                 emptyMessage={hasFilters ? "Sin coincidencias" : "Sin platos"}
                 emptyDescription={
                     hasFilters

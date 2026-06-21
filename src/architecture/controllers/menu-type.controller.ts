@@ -1,3 +1,4 @@
+import { Paginated } from "../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { IMenuTypeRepository } from "../core/domain/repository/menu-type/i-menu-type.repository";
 import {
@@ -18,7 +19,7 @@ export class MenuTypeController {
 
     async getAllMenuTypes(
         filters?: GetMenuTypesFilters,
-    ): Promise<Result<TMenuType[]>> {
+    ): Promise<Result<Paginated<TMenuType>>> {
         try {
             const result = await getAllMenuTypesUseCase(
                 this.repository,

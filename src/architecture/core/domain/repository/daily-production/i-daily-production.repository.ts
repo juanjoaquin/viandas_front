@@ -1,4 +1,5 @@
 import { Result } from "@/src/libs/result";
+import { Paginated } from "../../pagination";
 import {
     AddDailyProductionExtraInput,
     CreateDailyProductionPayload,
@@ -17,7 +18,7 @@ export interface IDailyProductionRepository {
     getByDate(
         date: string,
         filters?: TDailyProductionFilters,
-    ): Promise<Result<TDailyProduction[]>>;
+    ): Promise<Result<Paginated<TDailyProduction>>>;
     create(data: CreateDailyProductionPayload): Promise<Result<TDailyProduction>>;
     getKitchenTotals(date: string): Promise<Result<TKitchenTotals>>;
     getExtrasTotals(date: string): Promise<Result<TExtrasTotals>>;

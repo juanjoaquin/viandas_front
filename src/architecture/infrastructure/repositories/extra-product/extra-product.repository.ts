@@ -6,6 +6,7 @@ import {
 } from "@/src/architecture/core/domain/entities/ExtraProduct";
 import { GetExtraProductsFilters } from "@/src/architecture/core/domain/extra-product/get-extra-products-filters";
 import { HttpClient } from "../../http";
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 
 export class ExtraProductRepository implements IExtraProductRepository {
@@ -13,13 +14,14 @@ export class ExtraProductRepository implements IExtraProductRepository {
 
     async getAll(
         filters?: GetExtraProductsFilters,
-    ): Promise<Result<TExtraProduct[]>> {
+    ): Promise<Result<Paginated<TExtraProduct>>> {
         const params = new URLSearchParams();
         if (filters?.q) params.set("q", filters.q);
+        appendPaginationParams(params, filters);
         const qs = params.toString();
         const endpoint = qs ? `extra-products?${qs}` : "extra-products";
 
-        return await this.httpClient.get<TExtraProduct[]>(endpoint, {
+        return await this.httpClient.getPaginated<TExtraProduct>(endpoint, {
             tags: ["extra-products"],
         });
     }

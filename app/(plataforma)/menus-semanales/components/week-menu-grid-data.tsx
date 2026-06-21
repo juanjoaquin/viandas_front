@@ -1,5 +1,6 @@
 import { resolveWeekMenuAction } from "@/src/architecture/actions/week-menu/resolve-week-menu.action";
 import { getAllMenuTypesAction } from "@/src/architecture/actions/menu-type/get-all-menu-types.action";
+import { DEFAULT_PAGE_LIMIT } from "@/src/architecture/core/domain/pagination";
 import { TWeekMenu } from "@/src/architecture/core/domain/entities/WeekMenu";
 import { WeekMenuGrid } from "./week-menu-grid";
 
@@ -27,7 +28,7 @@ export async function WeekMenuGridData({
 
     const [weekMenuResult, menuTypesResult] = await Promise.all([
         resolveWeekMenuAction(requestedWeekMenuId),
-        getAllMenuTypesAction({ active: true }),
+        getAllMenuTypesAction({ active: true, page: 1, limit: DEFAULT_PAGE_LIMIT }),
     ]);
 
     if (!weekMenuResult.success) {
@@ -44,7 +45,7 @@ export async function WeekMenuGridData({
     }
 
     const weekMenu = weekMenuResult.data!;
-    const menuTypes = menuTypesResult.success ? (menuTypesResult.data ?? []) : [];
+    const menuTypes = menuTypesResult.success ? (menuTypesResult.data?.items ?? []) : [];
 
     return (
         <WeekMenuGrid

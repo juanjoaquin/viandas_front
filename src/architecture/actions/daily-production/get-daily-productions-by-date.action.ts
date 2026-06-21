@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { DailyProductionController } from "../../controllers/daily-production.controller";
@@ -41,7 +42,7 @@ const dailyProductionFiltersSchema = z.object({
 export async function getDailyProductionsByDateAction(
     date: string,
     filters?: TDailyProductionFilters,
-): Promise<Result<TDailyProduction[]>> {
+): Promise<Result<Paginated<TDailyProduction>>> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {

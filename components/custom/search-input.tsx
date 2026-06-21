@@ -4,8 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { resetPageParam, buildPageHref } from "@/lib/pagination-params";
 
-export function SearchInput({ q }: { q?: string }) {
+export function SearchInput({
+  q,
+  className,
+}: {
+  q?: string;
+  className?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -24,15 +32,14 @@ export function SearchInput({ q }: { q?: string }) {
 
       if (trimmed === current) return;
 
-      const params = new URLSearchParams(searchParams.toString());
+      const params = resetPageParam(new URLSearchParams(searchParams.toString()));
       if (trimmed) {
         params.set("q", trimmed);
       } else {
         params.delete("q");
       }
 
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, {
+      router.replace(buildPageHref(pathname, params), {
         scroll: false,
       });
     }, 400);
@@ -41,7 +48,7 @@ export function SearchInput({ q }: { q?: string }) {
   }, [value, pathname, router, searchParams]);
 
   return (
-    <div className="relative w-64">
+    <div className={cn("relative w-64", className)}>
       <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       <Input
         placeholder="Buscar por nombre..."

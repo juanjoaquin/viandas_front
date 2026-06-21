@@ -1,3 +1,4 @@
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { TDelivery } from "../../core/domain/entities/Delivery";
 import {
@@ -7,7 +8,7 @@ import {
 import { IDeliveryRepository } from "../../core/domain/repository/delivery/i-delivery.repository";
 import { Logger } from "../../infrastructure/logger/logger";
 
-export async function getAllDeliveriesUseCase(repository: IDeliveryRepository, filters?: GetDeliveriesFilters): Promise<Result<TDelivery[]>> {
+export async function getAllDeliveriesUseCase(repository: IDeliveryRepository, filters?: GetDeliveriesFilters): Promise<Result<Paginated<TDelivery>>> {
     try {
         const result = await repository.getAll(
             normalizeGetDeliveriesFilters(filters),

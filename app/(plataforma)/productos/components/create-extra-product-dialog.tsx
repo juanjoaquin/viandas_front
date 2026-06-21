@@ -24,13 +24,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { ProductCategorySearchInput } from "@/components/custom/inputs/product-category-search-input";
 import { createExtraProductAction } from "@/src/architecture/actions/extra-product/create-extra-product.action";
 import {
     CreateExtraProductFormInput,
@@ -47,16 +41,15 @@ function RequiredMark() {
     );
 }
 
-type CreateExtraProductDialogProps = {
-    categories: TProductCategory[];
-};
+type CreateExtraProductDialogProps = {};
 
-export function CreateExtraProductDialog({
-    categories,
-}: CreateExtraProductDialogProps) {
+export function CreateExtraProductDialog(_props: CreateExtraProductDialogProps = {}) {
     const [open, setOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<Pick<
+        TProductCategory,
+        "id" | "name"
+    > | null>(null);
     const router = useRouter();
-    const hasCategories = categories.length > 0;
 
     const {
         control,
@@ -97,7 +90,10 @@ export function CreateExtraProductDialog({
     }
 
     function handleOpenChange(value: boolean) {
-        if (!value) reset();
+        if (!value) {
+            reset();
+            setSelectedCategory(null);
+        }
         setOpen(value);
     }
 
@@ -156,34 +152,18 @@ export function CreateExtraProductDialog({
                                         Categoría
                                         <RequiredMark />
                                     </FieldLabel>
-                                    <Select
+                                    <ProductCategorySearchInput
                                         value={field.value}
-                                        onValueChange={field.onChange}
-                                        disabled={!hasCategories}
-                                    >
-                                        <SelectTrigger
-                                            className="w-full"
-                                            aria-invalid={fieldState.invalid}
-                                        >
-                                            <SelectValue placeholder="Seleccioná una categoría" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {categories.map((category) => (
-                                                <SelectItem
-                                                    key={category.id}
-                                                    value={category.id}
-                                                >
-                                                    {category.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {!hasCategories ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            Primero creá una categoría activa para poder
-                                            registrar productos.
-                                        </p>
-                                    ) : null}
+                                        selectedCategory={selectedCategory}
+                                        onValueChange={(categoryId, category) => {
+                                            field.onChange(categoryId);
+                                            setSelectedCategory(
+                                                category
+                                                    ? { id: category.id, name: category.name }
+                                                    : null,
+                                            );
+                                        }}
+                                    />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
                                     )}
@@ -235,7 +215,7 @@ export function CreateExtraProductDialog({
                         variant="brand"
                         type="submit"
                         form="create-extra-product-form"
-                        disabled={isSubmitting || !hasCategories}
+                        disabled={isSubmitting}
                     >
                         <PackagePlus data-icon="inline-start" />
                         {isSubmitting ? "Guardando..." : "Guardar Producto"}

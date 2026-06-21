@@ -3,6 +3,7 @@ import { TCustomer } from "./Customer";
 import { TDelivery } from "./Delivery";
 import { TMenuType } from "./MenuType";
 import { TProductCategory } from "./ProductCategory";
+import type { PaginationFilters } from "../pagination";
 
 export const fulfillmentTypes = ["PENDING", "DELIVERY", "PICKUP"] as const;
 export const dailyProductionSortOptions = ["quantity"] as const;
@@ -12,7 +13,7 @@ export type TFulfillmentType = (typeof fulfillmentTypes)[number];
 export type TDailyProductionSort = (typeof dailyProductionSortOptions)[number];
 export type TSortOrder = (typeof sortOrderOptions)[number];
 
-export type TDailyProductionFilters = {
+export type TDailyProductionFilters = PaginationFilters & {
     q?: string;
     fulfillment_type?: TFulfillmentType;
     menu_type_id?: string;

@@ -1,5 +1,6 @@
 "use server";
 
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { getAccessToken } from "@/src/libs/token";
 import { ProductCategoryController } from "../../controllers/product-category.controller";
@@ -11,7 +12,7 @@ import { ProductCategoryRepository } from "../../infrastructure/repositories/pro
 
 export async function getAllProductCategoriesAction(
     filters?: GetProductCategoriesFilters,
-): Promise<Result<TProductCategory[]>> {
+): Promise<Result<Paginated<TProductCategory>>> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {

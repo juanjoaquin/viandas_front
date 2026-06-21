@@ -1,67 +1,77 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MenuTypeSearchInput } from "@/components/custom/inputs/menu-type-search-input";
+import { getMenuTypeByIdAction } from "@/src/architecture/actions/menu-type/get-menu-type-by-id.action";
 import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
-
-const ALL_VALUE = "all";
+import { buildPageHref, resetPageParam } from "@/lib/pagination-params";
 
 type DishesMenuTypeSelectProps = {
-    menuTypes: TMenuType[];
     menuTypeId?: string;
 };
 
-export function DishesMenuTypeSelect({
-    menuTypes,
-    menuTypeId,
-}: DishesMenuTypeSelectProps) {
+export function DishesMenuTypeSelect({ menuTypeId }: DishesMenuTypeSelectProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [selectedMenuType, setSelectedMenuType] = useState<Pick<
+        TMenuType,
+        "id" | "name"
+    > | null>(null);
 
-    function handleChange(value: string) {
-        const params = new URLSearchParams(searchParams.toString());
-        if (value === ALL_VALUE) {
-            params.delete("menu_type_id");
-        } else {
-            params.set("menu_type_id", value);
+    useEffect(() => {
+        if (!menuTypeId) {
+            setSelectedMenuType(null);
+            return;
         }
-        const qs = params.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+
+        getMenuTypeByIdAction(menuTypeId).then((result) => {
+            if (result.success && result.data) {
+                setSelectedMenuType({ id: result.data.id, name: result.data.name });
+            }
+        });
+    }, [menuTypeId]);
+
+    function handleChange(id: string, menuType?: TMenuType) {
+        const params = resetPageParam(new URLSearchParams(searchParams.toString()));
+        if (!id) {
+            params.delete("menu_type_id");
+            setSelectedMenuType(null);
+        } else {
+            params.set("menu_type_id", id);
+            setSelectedMenuType(
+                menuType
+                    ? { id: menuType.id, name: menuType.name }
+                    : { id, name: selectedMenuType?.name ?? "" },
+            );
+        }
+        router.replace(buildPageHref(pathname, params), { scroll: false });
     }
 
     return (
-        <Select
-            value={menuTypeId ?? ALL_VALUE}
-            onValueChange={handleChange}
-            disabled={menuTypes.length === 0}
-        >
-            <SelectTrigger
-                size="sm"
-                className="h-8 w-48 border-slate-200/70 bg-slate-100 text-sm dark:border-slate-700 dark:bg-slate-800/60"
-            >
-                <SelectValue
-                    placeholder={
-                        menuTypes.length === 0
-                            ? "Sin tipos de menú"
-                            : "Tipo de menú"
-                    }
+        <div className="flex w-full items-center gap-1 md:w-auto">
+            <div className="min-w-0 flex-1 md:w-48 md:flex-none">
+                <MenuTypeSearchInput
+                    value={menuTypeId ?? ""}
+                    selectedMenuType={selectedMenuType}
+                    onValueChange={handleChange}
+                    placeholder="Filtrar por menú..."
                 />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value={ALL_VALUE}>Todos los tipos</SelectItem>
-                {menuTypes.map((menuType) => (
-                    <SelectItem key={menuType.id} value={menuType.id}>
-                        {menuType.name}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+            </div>
+            {menuTypeId ? (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleChange("")}
+                    aria-label="Quitar filtro de menú"
+                >
+                    <X className="size-3.5" />
+                </Button>
+            ) : null}
+        </div>
     );
 }

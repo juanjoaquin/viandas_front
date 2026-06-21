@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/custom/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
@@ -33,9 +34,15 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const navItems = [
+  {
+    title: "Overview",
+    url: "/overview",
+    icon: ClipboardList,
+  },
   {
     title: "Clientes",
     url: "/clientes",
@@ -107,19 +114,14 @@ function CollapsibleNavItem({
     (child) =>
       pathname === child.url || pathname.startsWith(`${child.url}/`),
   );
-  const [open, setOpen] = useState(isParentActive);
-
-  useEffect(() => {
-    if (isParentActive) {
-      setOpen(true);
-    }
-  }, [isParentActive]);
+  const [userOpen, setUserOpen] = useState(false);
+  const open = isParentActive || userOpen;
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setUserOpen((prev) => !prev)}
         isActive={isParentActive}
         tooltip={title}
       >
@@ -169,6 +171,12 @@ type AppSidebarProps = {
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+
   const initials = user.name
     .split(" ")
     .slice(0, 2)
@@ -244,6 +252,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarMenu className="px-2">
+        <SidebarMenuItem>
+          <ThemeToggle />
+        </SidebarMenuItem>
+      </SidebarMenu>
 
       <div className="mx-3 h-px bg-sidebar-border" />
 

@@ -5,11 +5,11 @@ import { CreateMenuDialog } from "./components/create-menu-dialog";
 import { MenusTableSkeleton } from "./components/menus-table-skeleton";
 
 type MenusPageProps = {
-    searchParams: Promise<{ q?: string; active?: string }>;
+    searchParams: Promise<{ q?: string; active?: string; page?: string; limit?: string }>;
 };
 
 export default async function Page({ searchParams }: MenusPageProps) {
-    const { q, active } = await searchParams;
+    const { q, active, page, limit } = await searchParams;
 
     return (
         <>
@@ -21,7 +21,7 @@ export default async function Page({ searchParams }: MenusPageProps) {
 
             <div className="flex flex-col gap-4 p-6">
                 <Suspense fallback={<MenusTableSkeleton />}>
-                    <MenusTableData q={q} active={active} />
+                    <MenusTableData q={q} active={active} page={page} limit={limit} />
                 </Suspense>
             </div>
         </>

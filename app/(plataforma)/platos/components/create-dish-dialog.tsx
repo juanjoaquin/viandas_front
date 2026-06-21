@@ -25,13 +25,7 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { MenuTypeSearchInput } from "@/components/custom/inputs/menu-type-search-input";
 import {
     createDishInputSchema,
     type CreateDishInput,
@@ -48,12 +42,14 @@ function RequiredMark() {
     );
 }
 
-type CreateDishDialogProps = {
-    menuTypes: TMenuType[];
-};
+type CreateDishDialogProps = {};
 
-export function CreateDishDialog({ menuTypes }: CreateDishDialogProps) {
+export function CreateDishDialog(_props: CreateDishDialogProps = {}) {
     const [open, setOpen] = useState(false);
+    const [selectedMenuType, setSelectedMenuType] = useState<Pick<
+        TMenuType,
+        "id" | "name"
+    > | null>(null);
     const router = useRouter();
 
     const {
@@ -90,7 +86,10 @@ export function CreateDishDialog({ menuTypes }: CreateDishDialogProps) {
     }
 
     function handleOpenChange(value: boolean) {
-        if (!value) reset();
+        if (!value) {
+            reset();
+            setSelectedMenuType(null);
+        }
         setOpen(value);
     }
 
@@ -144,7 +143,6 @@ export function CreateDishDialog({ menuTypes }: CreateDishDialogProps) {
                                 <Field data-invalid={fieldState.invalid}>
                                     <FieldLabel htmlFor={field.name}>
                                         Descripción
-                                        <RequiredMark />
                                     </FieldLabel>
                                     <Input
                                         {...field}
@@ -168,34 +166,18 @@ export function CreateDishDialog({ menuTypes }: CreateDishDialogProps) {
                                         Tipo de menú
                                         <RequiredMark />
                                     </FieldLabel>
-                                    <Select
+                                    <MenuTypeSearchInput
                                         value={field.value}
-                                        onValueChange={field.onChange}
-                                        disabled={menuTypes.length === 0}
-                                    >
-                                        <SelectTrigger
-                                            className="w-full"
-                                            aria-invalid={fieldState.invalid}
-                                        >
-                                            <SelectValue
-                                                placeholder={
-                                                    menuTypes.length === 0
-                                                        ? "No hay tipos de menú disponibles"
-                                                        : "Seleccioná un tipo de menú"
-                                                }
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {menuTypes.map((menuType) => (
-                                                <SelectItem
-                                                    key={menuType.id}
-                                                    value={menuType.id}
-                                                >
-                                                    {menuType.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        selectedMenuType={selectedMenuType}
+                                        onValueChange={(menuTypeId, menuType) => {
+                                            field.onChange(menuTypeId);
+                                            setSelectedMenuType(
+                                                menuType
+                                                    ? { id: menuType.id, name: menuType.name }
+                                                    : null,
+                                            );
+                                        }}
+                                    />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
                                     )}

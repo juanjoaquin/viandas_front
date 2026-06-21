@@ -1,3 +1,4 @@
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { TDish } from "../../core/domain/entities/Dish";
 import {
@@ -10,7 +11,7 @@ import { Logger } from "../../infrastructure/logger/logger";
 export async function getAllDishesUseCase(
     repository: IDishRepository,
     filters?: GetDishesFilters,
-): Promise<Result<TDish[]>> {
+): Promise<Result<Paginated<TDish>>> {
     try {
         const result = await repository.getAll(
             normalizeGetDishesFilters(filters),

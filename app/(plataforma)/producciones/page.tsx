@@ -1,7 +1,4 @@
 import { Suspense } from "react";
-import { getAllDeliveriesAction } from "@/src/architecture/actions/delivery/get-all-deliveries.action";
-import { getAllExtraProductsAction } from "@/src/architecture/actions/extra-product/get-all-extra-products.action";
-import { getAllMenuTypesAction } from "@/src/architecture/actions/menu-type/get-all-menu-types.action";
 import {
     dailyProductionSortOptions,
     fulfillmentTypes,
@@ -23,6 +20,8 @@ type ProduccionesPageProps = {
         delivery_id?: string;
         sort?: string;
         order?: string;
+        page?: string;
+        limit?: string;
     }>;
 };
 
@@ -96,40 +95,16 @@ export default async function ProduccionesPage({
     const selectedDate = normalizeDate(date);
     const filters = normalizeFilters(params);
 
-    const [menuTypesResult, deliveriesResult, extraProductsResult] = await Promise.all([
-        getAllMenuTypesAction(),
-        getAllDeliveriesAction(),
-        getAllExtraProductsAction(),
-    ]);
-
-    const menuTypes = menuTypesResult.success ? (menuTypesResult.data ?? []) : [];
-    const deliveries = deliveriesResult.success ? (deliveriesResult.data ?? []) : [];
-    const extraProducts = extraProductsResult.success
-        ? (extraProductsResult.data ?? [])
-        : [];
-
     return (
         <>
             <PageHeader
                 title="Producción Diaria"
                 description="Gestioná las viandas de cada día por cliente, entrega y tipo de menú."
-                action={
-                    <CreateDailyProductionDialog
-                        initialDate={selectedDate}
-                        menuTypes={menuTypes}
-                        deliveries={deliveries}
-                        extraProducts={extraProducts}
-                    />
-                }
+                action={<CreateDailyProductionDialog initialDate={selectedDate} />}
             />
 
             <div className="flex flex-col gap-4 p-6">
-                <DailyProductionFilters
-                    date={selectedDate}
-                    filters={filters}
-                    menuTypes={menuTypes}
-                    deliveries={deliveries}
-                />
+                <DailyProductionFilters date={selectedDate} filters={filters} />
                 <Suspense
                     key={selectedDate}
                     fallback={<DailyProductionsSkeleton />}
@@ -137,8 +112,8 @@ export default async function ProduccionesPage({
                     <DailyProductionsData
                         date={selectedDate}
                         filters={filters}
-                        menuTypes={menuTypes}
-                        deliveries={deliveries}
+                        page={params.page}
+                        limit={params.limit}
                     />
                 </Suspense>
             </div>

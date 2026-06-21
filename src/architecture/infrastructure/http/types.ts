@@ -1,10 +1,11 @@
 import type { Result } from "@/src/libs/result";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 
 export interface BackendResponse<T> {
   message: string;
   code: number;
   data: T;
-  meta?: unknown;
+  meta?: PaginationMeta;
 }
 
 /** Opciones de cache agnósticas al framework. El HttpClient las traduce internamente. */
@@ -28,6 +29,10 @@ export type HttpClientConfig = {
 
 export interface IHttpClient {
   get<T>(endpoint: string, options?: HttpRequestOptions): Promise<Result<T>>;
+  getPaginated<T>(
+    endpoint: string,
+    options?: HttpRequestOptions,
+  ): Promise<Result<import("@/src/architecture/core/domain/pagination").Paginated<T>>>;
   post<T>(
     endpoint: string,
     body: unknown,

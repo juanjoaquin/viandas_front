@@ -11,17 +11,15 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TDish } from "@/src/architecture/core/domain/entities/Dish";
-import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
 import { getDishByIdAction } from "@/src/architecture/actions/dish/get-dish-by-id.action";
 import { EditDishDialog } from "./edit-dish-dialog";
 import { DeleteDishDialog } from "./delete-dish-dialog";
 
 type DishRowActionsProps = {
     dish: TDish;
-    menuTypes: TMenuType[];
 };
 
-export function DishID({ dish, menuTypes }: DishRowActionsProps) {
+export function DishID({ dish }: DishRowActionsProps) {
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [dishToEdit, setDishToEdit] = useState<TDish | null>(null);
@@ -93,7 +91,6 @@ export function DishID({ dish, menuTypes }: DishRowActionsProps) {
             {dishToEdit && (
                 <EditDishDialog
                     dish={dishToEdit}
-                    menuTypes={menuTypes}
                     open={editOpen}
                     onOpenChange={handleEditOpenChange}
                 />

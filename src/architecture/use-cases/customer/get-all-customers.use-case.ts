@@ -3,6 +3,7 @@ import {
     GetCustomersFilters,
     normalizeGetCustomersFilters,
 } from "../../core/domain/customer/get-customers-filters";
+import { Paginated } from "../../core/domain/pagination";
 import { ICustomerRepository } from "../../core/domain/repository/customer/i-customer.repository";
 import { Err, Result } from "@/src/libs/result";
 import { Logger } from "../../infrastructure/logger/logger";
@@ -10,7 +11,7 @@ import { Logger } from "../../infrastructure/logger/logger";
 export async function getAllCustomersUseCase(
     repository: ICustomerRepository,
     filters?: GetCustomersFilters,
-): Promise<Result<TCustomer[]>> {
+): Promise<Result<Paginated<TCustomer>>> {
     try {
         const result = await repository.getAll(
             normalizeGetCustomersFilters(filters),

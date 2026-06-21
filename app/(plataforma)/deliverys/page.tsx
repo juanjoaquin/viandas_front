@@ -7,11 +7,11 @@ import { CreateDeliveryDialog } from "./components/create-delivery-dialog";
 
 
 type DeliverysPageProps = {
-    searchParams: Promise<{ q?: string }>;
+    searchParams: Promise<{ q?: string; page?: string; limit?: string }>;
 };
 
 export default async function Page({ searchParams }: DeliverysPageProps) {
-    const { q } = await searchParams;
+    const { q, page, limit } = await searchParams;
 
     return (
         <>
@@ -23,7 +23,7 @@ export default async function Page({ searchParams }: DeliverysPageProps) {
 
             <div className="flex flex-col gap-4 p-6">
                 <Suspense fallback={<DeliverysTableSkeleton />}>
-                    <DeliveriesTableData q={q} />
+                    <DeliveriesTableData q={q} page={page} limit={limit} />
                 </Suspense>
             </div>
         </>

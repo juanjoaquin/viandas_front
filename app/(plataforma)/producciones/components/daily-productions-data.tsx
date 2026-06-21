@@ -1,33 +1,37 @@
-import { getAllExtraProductsAction } from "@/src/architecture/actions/extra-product/get-all-extra-products.action";
 import { getDailyProductionsByDateAction } from "@/src/architecture/actions/daily-production/get-daily-productions-by-date.action";
 import { getExtrasTotalsAction } from "@/src/architecture/actions/daily-production/get-extras-totals.action";
 import { getKitchenTotalsAction } from "@/src/architecture/actions/daily-production/get-kitchen-totals.action";
 import { TDailyProductionFilters } from "@/src/architecture/core/domain/entities/DailyProduction";
-import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
-import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
+import { parsePaginationParams } from "@/src/architecture/core/domain/pagination";
 import { DailyProductionSummary } from "./daily-production-summary";
 import { DailyProductionsTable } from "./daily-productions-table";
 
 type DailyProductionsDataProps = {
     date: string;
     filters?: TDailyProductionFilters;
-    menuTypes: TMenuType[];
-    deliveries: TDelivery[];
+    page?: string;
+    limit?: string;
 };
 
 export async function DailyProductionsData({
     date,
     filters,
-    menuTypes,
-    deliveries,
+    page,
+    limit,
 }: DailyProductionsDataProps) {
-    const [productionsResult, kitchenTotalsResult, extrasTotalsResult, extraProductsResult] =
+    const { page: currentPage, limit: currentLimit } = parsePaginationParams(page, limit);
+    const paginatedFilters: TDailyProductionFilters = {
+        ...filters,
+        page: currentPage,
+        limit: currentLimit,
+    };
+
+    const [productionsResult, kitchenTotalsResult, extrasTotalsResult] =
         await Promise.all([
-        getDailyProductionsByDateAction(date, filters),
-        getKitchenTotalsAction(date),
-        getExtrasTotalsAction(date),
-        getAllExtraProductsAction(),
-    ]);
+            getDailyProductionsByDateAction(date, paginatedFilters),
+            getKitchenTotalsAction(date),
+            getExtrasTotalsAction(date),
+        ]);
 
     if (!productionsResult.success) {
         return (
@@ -37,12 +41,8 @@ export async function DailyProductionsData({
         );
     }
 
-    const productions = productionsResult.data ?? [];
     const kitchenTotals = kitchenTotalsResult.success ? kitchenTotalsResult.data : null;
     const extrasTotals = extrasTotalsResult.success ? extrasTotalsResult.data : null;
-    const extraProducts = extraProductsResult.success
-        ? (extraProductsResult.data ?? []).filter((product) => product.active)
-        : [];
 
     return (
         <div className="space-y-4">
@@ -52,10 +52,8 @@ export async function DailyProductionsData({
                 extrasTotals={extrasTotals}
             />
             <DailyProductionsTable
-                productions={productions}
-                menuTypes={menuTypes}
-                deliveries={deliveries}
-                extraProducts={extraProducts}
+                productions={productionsResult.data?.items ?? []}
+                meta={productionsResult.data?.meta}
                 filters={filters}
             />
         </div>

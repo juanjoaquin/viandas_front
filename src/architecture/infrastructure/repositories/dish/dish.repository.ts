@@ -2,19 +2,21 @@ import { IDishRepository } from "@/src/architecture/core/domain/repository/dish/
 import { CreateDishInput, TDish, UpdateDishInput } from "@/src/architecture/core/domain/entities/Dish";
 import { GetDishesFilters } from "@/src/architecture/core/domain/dish/get-dishes-filters";
 import { HttpClient } from "../../http";
+import { appendPaginationParams, Paginated } from "@/src/architecture/core/domain/pagination";
 import { Result } from "@/src/libs/result";
 
 export class DishRepository implements IDishRepository {
     constructor(private readonly httpClient: HttpClient) {}
 
-    async getAll(filters?: GetDishesFilters): Promise<Result<TDish[]>> {
+    async getAll(filters?: GetDishesFilters): Promise<Result<Paginated<TDish>>> {
         const params = new URLSearchParams();
         if (filters?.q) params.set("q", filters.q);
         if (filters?.menu_type_id) params.set("menu_type_id", filters.menu_type_id);
+        appendPaginationParams(params, filters);
         const qs = params.toString();
         const endpoint = qs ? `dishes?${qs}` : "dishes";
 
-        return await this.httpClient.get<TDish[]>(endpoint, {
+        return await this.httpClient.getPaginated<TDish>(endpoint, {
             tags: ["dishes"],
         });
     }

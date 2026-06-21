@@ -5,11 +5,11 @@ import { ProductCategoriesTableData } from "./components/product-categories-tabl
 import { ProductCategoriesTableSkeleton } from "./components/product-categories-table-skeleton";
 
 type CategoriasPageProps = {
-    searchParams: Promise<{ q?: string; active?: string }>;
+    searchParams: Promise<{ q?: string; active?: string; page?: string; limit?: string }>;
 };
 
 export default async function Page({ searchParams }: CategoriasPageProps) {
-    const { q, active } = await searchParams;
+    const { q, active, page, limit } = await searchParams;
 
     return (
         <>
@@ -21,7 +21,7 @@ export default async function Page({ searchParams }: CategoriasPageProps) {
 
             <div className="flex flex-col gap-4 p-6">
                 <Suspense fallback={<ProductCategoriesTableSkeleton />}>
-                    <ProductCategoriesTableData q={q} active={active} />
+                    <ProductCategoriesTableData q={q} active={active} page={page} limit={limit} />
                 </Suspense>
             </div>
         </>

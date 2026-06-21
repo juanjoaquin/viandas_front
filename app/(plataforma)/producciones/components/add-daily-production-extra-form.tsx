@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -24,13 +24,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { ExtraProductSearchInput } from "@/components/custom/inputs/extra-product-search-input";
 import { addDailyProductionExtraAction } from "@/src/architecture/actions/daily-production/add-daily-production-extra.action";
 import {
     AddDailyProductionExtraInput,
@@ -41,18 +35,21 @@ import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProd
 
 type AddDailyProductionExtraFormProps = {
     production: TDailyProduction;
-    extraProducts: TExtraProduct[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
 export function AddDailyProductionExtraForm({
     production,
-    extraProducts,
     open,
     onOpenChange,
 }: AddDailyProductionExtraFormProps) {
     const router = useRouter();
+    const [selectedProduct, setSelectedProduct] = useState<Pick<
+        TExtraProduct,
+        "id" | "name"
+    > | null>(null);
+
     const usedExtraProductIds = useMemo(
         () =>
             new Set(
@@ -61,9 +58,6 @@ export function AddDailyProductionExtraForm({
                     .filter((id): id is string => Boolean(id)),
             ),
         [production.extras],
-    );
-    const hasAvailableProducts = extraProducts.some(
-        (product) => !usedExtraProductIds.has(product.id),
     );
 
     const {
@@ -86,6 +80,7 @@ export function AddDailyProductionExtraForm({
                 extra_product_id: "",
                 quantity: 1,
             });
+            setSelectedProduct(null);
         }
 
         onOpenChange(value);
@@ -142,31 +137,19 @@ export function AddDailyProductionExtraForm({
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
                                     <FieldLabel>Producto</FieldLabel>
-                                    <Select
+                                    <ExtraProductSearchInput
                                         value={field.value}
-                                        onValueChange={field.onChange}
-                                        disabled={!hasAvailableProducts}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Seleccionar producto" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {extraProducts.map((product) => (
-                                                <SelectItem
-                                                    key={product.id}
-                                                    value={product.id}
-                                                    disabled={usedExtraProductIds.has(product.id)}
-                                                >
-                                                    {product.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {!hasAvailableProducts ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            No hay productos activos disponibles para agregar.
-                                        </p>
-                                    ) : null}
+                                        selectedProduct={selectedProduct}
+                                        disabledIds={usedExtraProductIds}
+                                        onValueChange={(productId, product) => {
+                                            field.onChange(productId);
+                                            setSelectedProduct(
+                                                product
+                                                    ? { id: product.id, name: product.name }
+                                                    : null,
+                                            );
+                                        }}
+                                    />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
                                     )}
@@ -229,7 +212,7 @@ export function AddDailyProductionExtraForm({
                         variant="brand"
                         type="submit"
                         form="add-daily-production-extra-form"
-                        disabled={isSubmitting || !hasAvailableProducts}
+                        disabled={isSubmitting}
                     >
                         <Save data-icon="inline-start" />
                         {isSubmitting ? "Agregando..." : "Agregar producto"}

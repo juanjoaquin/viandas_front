@@ -1,3 +1,4 @@
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import { TExtraProduct } from "../../core/domain/entities/ExtraProduct";
 import {
@@ -10,7 +11,7 @@ import { Logger } from "../../infrastructure/logger/logger";
 export async function getAllExtraProductsUseCase(
     repository: IExtraProductRepository,
     filters?: GetExtraProductsFilters,
-): Promise<Result<TExtraProduct[]>> {
+): Promise<Result<Paginated<TExtraProduct>>> {
     try {
         const result = await repository.getAll(
             normalizeGetExtraProductsFilters(filters),

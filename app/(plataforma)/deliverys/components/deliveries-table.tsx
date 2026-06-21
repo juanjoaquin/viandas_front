@@ -4,9 +4,10 @@ import { Check, X } from "lucide-react";
 import { ColumnDef, DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
+import type { PaginationMeta } from "@/src/architecture/core/domain/pagination";
 import { SearchInput } from "../../../../components/custom/search-input";
-import { CreateDeliveryDialog } from "./create-delivery-dialog";
 import { DeliveryID } from "./delivery-id";
+import { useTablePagination } from "@/hooks/use-table-pagination";
 
 function ActiveBadge({ active }: { active: boolean }) {
     return (
@@ -71,18 +72,23 @@ function DeliveryAvatar({ name }: { name: string }) {
 
 type DeliveriesTableProps = {
     deliveries: TDelivery[];
+    meta?: PaginationMeta;
     q?: string;
 };
 
-export function DeliveriesTable({ deliveries, q }: DeliveriesTableProps) {
+export function DeliveriesTable({ deliveries, meta, q }: DeliveriesTableProps) {
+    const { goToPage } = useTablePagination();
+
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs">
-                <SearchInput q={q} />
+            <div className="flex flex-col gap-3 rounded-xl border bg-card px-4 py-3 shadow-xs md:flex-row md:flex-wrap md:items-center">
+                <SearchInput q={q} className="w-full md:w-64" />
             </div>
             <DataTable
                 columns={columns}
                 data={deliveries}
+                meta={meta}
+                onPageChange={goToPage}
                 emptyMessage={q ? "Sin coincidencias" : "Sin deliveries"}
                 emptyDescription={
                     q

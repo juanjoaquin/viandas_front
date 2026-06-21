@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { PackageCheck } from "lucide-react";
@@ -24,13 +25,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { ProductCategorySearchInput } from "@/components/custom/inputs/product-category-search-input";
 import { Switch } from "@/components/ui/switch";
 import { updateExtraProductAction } from "@/src/architecture/actions/extra-product/update-extra-product.action";
 import {
@@ -51,19 +46,24 @@ function RequiredMark() {
 
 type EditExtraProductDialogProps = {
     product: TExtraProduct;
-    categories: TProductCategory[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
 export function EditExtraProductDialog({
     product,
-    categories,
     open,
     onOpenChange,
 }: EditExtraProductDialogProps) {
     const router = useRouter();
-    const hasCategories = categories.length > 0;
+    const [selectedCategory, setSelectedCategory] = useState<Pick<
+        TProductCategory,
+        "id" | "name"
+    > | null>(
+        product.category
+            ? { id: product.category.id, name: product.category.name }
+            : null,
+    );
 
     const {
         control,
@@ -153,33 +153,18 @@ export function EditExtraProductDialog({
                                         Categoría
                                         <RequiredMark />
                                     </FieldLabel>
-                                    <Select
+                                    <ProductCategorySearchInput
                                         value={field.value}
-                                        onValueChange={field.onChange}
-                                        disabled={!hasCategories}
-                                    >
-                                        <SelectTrigger
-                                            className="w-full"
-                                            aria-invalid={fieldState.invalid}
-                                        >
-                                            <SelectValue placeholder="Seleccioná una categoría" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {categories.map((category) => (
-                                                <SelectItem
-                                                    key={category.id}
-                                                    value={category.id}
-                                                >
-                                                    {category.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {!hasCategories ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            No hay categorías activas disponibles.
-                                        </p>
-                                    ) : null}
+                                        selectedCategory={selectedCategory}
+                                        onValueChange={(categoryId, category) => {
+                                            field.onChange(categoryId);
+                                            setSelectedCategory(
+                                                category
+                                                    ? { id: category.id, name: category.name }
+                                                    : null,
+                                            );
+                                        }}
+                                    />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
                                     )}
@@ -254,7 +239,7 @@ export function EditExtraProductDialog({
                         variant="brand"
                         type="submit"
                         form="edit-extra-product-form"
-                        disabled={isSubmitting || !hasCategories}
+                        disabled={isSubmitting}
                     >
                         <PackageCheck data-icon="inline-start" />
                         {isSubmitting ? "Guardando..." : "Guardar Cambios"}

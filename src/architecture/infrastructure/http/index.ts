@@ -7,3 +7,4 @@ export type {
   HttpRequestOptions,
   IHttpClient,
 } from "./types";
+export type { Paginated, PaginationMeta } from "@/src/architecture/core/domain/pagination";

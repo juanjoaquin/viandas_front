@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Minus, Plus, Save } from "lucide-react";
@@ -22,6 +23,9 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { DeliverySearchInput } from "@/components/custom/inputs/delivery-search-input";
+import { ExtraProductSearchInput } from "@/components/custom/inputs/extra-product-search-input";
+import { MenuTypeSearchInput } from "@/components/custom/inputs/menu-type-search-input";
 import {
     Select,
     SelectContent,
@@ -113,22 +117,49 @@ function completeExtrasCount(extras?: EditExtraForm[]) {
 
 type EditDailyProductionDialogProps = {
     production: TDailyProduction;
-    deliveries: TDelivery[];
-    menuTypes: TMenuType[];
-    extraProducts: TExtraProduct[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
 export function EditDailyProductionDialog({
     production,
-    deliveries,
-    menuTypes,
-    extraProducts,
     open,
     onOpenChange,
 }: EditDailyProductionDialogProps) {
     const router = useRouter();
+    const [selectedDelivery, setSelectedDelivery] = useState<Pick<
+        TDelivery,
+        "id" | "name"
+    > | null>(
+        production.delivery
+            ? { id: production.delivery.id, name: production.delivery.name }
+            : null,
+    );
+    const [selectedMenuTypes, setSelectedMenuTypes] = useState<
+        Record<number, Pick<TMenuType, "id" | "name">>
+    >(() => {
+        const initial: Record<number, Pick<TMenuType, "id" | "name">> = {};
+        production.lines?.forEach((line, index) => {
+            if (line.menu_type?.id) {
+                initial[index] = { id: line.menu_type.id, name: line.menu_type.name };
+            }
+        });
+        return initial;
+    });
+    const [selectedExtraProducts, setSelectedExtraProducts] = useState<
+        Record<number, Pick<TExtraProduct, "id" | "name">>
+    >(() => {
+        const initial: Record<number, Pick<TExtraProduct, "id" | "name">> = {};
+        production.extras?.forEach((extra, index) => {
+            if (extra.extra_product?.id) {
+                initial[index] = {
+                    id: extra.extra_product.id,
+                    name: extra.extra_product.name,
+                };
+            }
+        });
+        return initial;
+    });
 
     const {
         control,
@@ -415,30 +446,18 @@ export function EditDailyProductionDialog({
                                     render={({ field }) => (
                                         <Field>
                                             <FieldLabel>Repartidor</FieldLabel>
-                                            <Select
+                                            <DeliverySearchInput
                                                 value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Seleccionar repartidor" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {deliveries
-                                                        .filter(
-                                                            (delivery) =>
-                                                                delivery.active ||
-                                                                delivery.id === production.delivery?.id,
-                                                        )
-                                                        .map((delivery) => (
-                                                            <SelectItem
-                                                                key={delivery.id}
-                                                                value={delivery.id}
-                                                            >
-                                                                {delivery.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                </SelectContent>
-                                            </Select>
+                                                selectedDelivery={selectedDelivery}
+                                                onValueChange={(deliveryId, delivery) => {
+                                                    field.onChange(deliveryId);
+                                                    setSelectedDelivery(
+                                                        delivery
+                                                            ? { id: delivery.id, name: delivery.name }
+                                                            : null,
+                                                    );
+                                                }}
+                                            />
                                         </Field>
                                     )}
                                 />
@@ -492,31 +511,43 @@ export function EditDailyProductionDialog({
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Select
+                                                        <MenuTypeSearchInput
                                                             value={field.value}
-                                                            onValueChange={field.onChange}
-                                                        >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Seleccionar tipo de menú" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {menuTypes
-                                                                    .filter(
-                                                                        (menuType) =>
-                                                                            menuType.active ||
-                                                                            menuType.id === field.value,
-                                                                    )
-                                                                    .map((menuType) => (
-                                                                        <SelectItem
-                                                                            key={menuType.id}
-                                                                            value={menuType.id}
-                                                                            disabled={disabledIds.has(menuType.id)}
-                                                                        >
-                                                                            {menuType.name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                            selectedMenuType={
+                                                                selectedMenuTypes[index] ??
+                                                                (field.value &&
+                                                                production.lines?.[index]
+                                                                    ?.menu_type
+                                                                    ? {
+                                                                          id: production.lines[index]
+                                                                              .menu_type!.id,
+                                                                          name: production.lines[
+                                                                              index
+                                                                          ].menu_type!.name,
+                                                                      }
+                                                                    : null)
+                                                            }
+                                                            disabledIds={disabledIds}
+                                                            activeOnly
+                                                            onValueChange={(
+                                                                menuTypeId,
+                                                                menuType,
+                                                            ) => {
+                                                                field.onChange(menuTypeId);
+                                                                setSelectedMenuTypes((prev) => {
+                                                                    const next = { ...prev };
+                                                                    if (menuType) {
+                                                                        next[index] = {
+                                                                            id: menuType.id,
+                                                                            name: menuType.name,
+                                                                        };
+                                                                    } else {
+                                                                        delete next[index];
+                                                                    }
+                                                                    return next;
+                                                                });
+                                                            }}
+                                                        />
                                                         {fieldState.invalid && (
                                                             <FieldError errors={[fieldState.error]} />
                                                         )}
@@ -618,31 +649,39 @@ export function EditDailyProductionDialog({
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Select
+                                                        <ExtraProductSearchInput
                                                             value={field.value}
-                                                            onValueChange={field.onChange}
-                                                        >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Seleccionar producto" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {extraProducts
-                                                                    .filter(
-                                                                        (product) =>
-                                                                            product.active ||
-                                                                            product.id === field.value,
-                                                                    )
-                                                                    .map((product) => (
-                                                                        <SelectItem
-                                                                            key={product.id}
-                                                                            value={product.id}
-                                                                            disabled={disabledIds.has(product.id)}
-                                                                        >
-                                                                            {product.name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                            selectedProduct={
+                                                                selectedExtraProducts[index] ??
+                                                                (field.value &&
+                                                                production.extras?.[index]
+                                                                    ?.extra_product
+                                                                    ? {
+                                                                          id: production.extras[index]
+                                                                              .extra_product!.id,
+                                                                          name: production.extras[
+                                                                              index
+                                                                          ].extra_product!.name,
+                                                                      }
+                                                                    : null)
+                                                            }
+                                                            disabledIds={disabledIds}
+                                                            onValueChange={(productId, product) => {
+                                                                field.onChange(productId);
+                                                                setSelectedExtraProducts((prev) => {
+                                                                    const next = { ...prev };
+                                                                    if (product) {
+                                                                        next[index] = {
+                                                                            id: product.id,
+                                                                            name: product.name,
+                                                                        };
+                                                                    } else {
+                                                                        delete next[index];
+                                                                    }
+                                                                    return next;
+                                                                });
+                                                            }}
+                                                        />
                                                         {fieldState.invalid && (
                                                             <FieldError errors={[fieldState.error]} />
                                                         )}

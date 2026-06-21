@@ -10,25 +10,16 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TDailyProduction } from "@/src/architecture/core/domain/entities/DailyProduction";
-import { TDelivery } from "@/src/architecture/core/domain/entities/Delivery";
-import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
-import { TMenuType } from "@/src/architecture/core/domain/entities/MenuType";
 import { AddDailyProductionExtraForm } from "./add-daily-production-extra-form";
 import { DeleteDailyProductionDialog } from "./delete-daily-production-dialog";
 import { EditDailyProductionDialog } from "./edit-daily-production-dialog";
 
 type DailyProductionRowActionsProps = {
     production: TDailyProduction;
-    deliveries: TDelivery[];
-    menuTypes: TMenuType[];
-    extraProducts: TExtraProduct[];
 };
 
 export function DailyProductionRowActions({
     production,
-    deliveries,
-    menuTypes,
-    extraProducts,
 }: DailyProductionRowActionsProps) {
     const [addExtraOpen, setAddExtraOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -93,16 +84,12 @@ export function DailyProductionRowActions({
 
             <AddDailyProductionExtraForm
                 production={production}
-                extraProducts={extraProducts}
                 open={addExtraOpen}
                 onOpenChange={setAddExtraOpen}
             />
 
             <EditDailyProductionDialog
                 production={production}
-                deliveries={deliveries}
-                menuTypes={menuTypes}
-                extraProducts={extraProducts}
                 open={editOpen}
                 onOpenChange={setEditOpen}
             />

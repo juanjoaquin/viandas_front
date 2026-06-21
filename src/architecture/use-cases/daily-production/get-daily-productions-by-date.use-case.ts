@@ -1,3 +1,4 @@
+import { Paginated } from "../../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import {
     TDailyProduction,
@@ -10,7 +11,7 @@ export async function getDailyProductionsByDateUseCase(
     repository: IDailyProductionRepository,
     date: string,
     filters?: TDailyProductionFilters,
-): Promise<Result<TDailyProduction[]>> {
+): Promise<Result<Paginated<TDailyProduction>>> {
     try {
         const result = await repository.getByDate(date, filters);
 

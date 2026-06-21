@@ -6,6 +6,7 @@ import { updateCustomerUseCase } from "../use-cases/customer/update-customer.use
 import { deleteCustomerUseCase } from "../use-cases/customer/delete-customer.use-case";
 import { ICustomerRepository } from "../core/domain/repository/customer/i-customer.repository";
 import { GetCustomersFilters } from "../core/domain/customer/get-customers-filters";
+import { Paginated } from "../core/domain/pagination";
 import { CreateCustomerInput, TCustomer, UpdateCustomerInput } from "../core/domain/entities/Customer";
 import { Logger } from "../infrastructure/logger/logger";
 
@@ -14,7 +15,7 @@ export class CustomerController {
 
     async getAllCustomers(
         filters?: GetCustomersFilters,
-    ): Promise<Result<TCustomer[]>> {
+    ): Promise<Result<Paginated<TCustomer>>> {
         try {
             const result = await getAllCustomersUseCase(
                 this.repository,

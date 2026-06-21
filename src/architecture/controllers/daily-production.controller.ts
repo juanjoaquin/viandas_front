@@ -1,3 +1,4 @@
+import { Paginated } from "../core/domain/pagination";
 import { Err, Result } from "@/src/libs/result";
 import {
     AddDailyProductionExtraInput,
@@ -32,7 +33,7 @@ export class DailyProductionController {
     async getDailyProductionsByDate(
         date: string,
         filters?: TDailyProductionFilters,
-    ): Promise<Result<TDailyProduction[]>> {
+    ): Promise<Result<Paginated<TDailyProduction>>> {
         try {
             const result = await getDailyProductionsByDateUseCase(
                 this.repository,

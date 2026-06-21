@@ -1,29 +1,30 @@
 import { getAllExtraProductsAction } from "@/src/architecture/actions/extra-product/get-all-extra-products.action";
-import { getAllProductCategoriesAction } from "@/src/architecture/actions/product-category/get-all-product-categories.action";
+import { parsePaginationParams } from "@/src/architecture/core/domain/pagination";
 import { ExtraProductsTable } from "./extra-products-table";
 
 type ExtraProductsTableDataProps = {
     q?: string;
+    page?: string;
+    limit?: string;
 };
 
-export async function ExtraProductsTableData({ q }: ExtraProductsTableDataProps) {
-    const filters = q ? { q } : undefined;
-    const [result, categoriesResult] = await Promise.all([
-        getAllExtraProductsAction(filters),
-        getAllProductCategoriesAction(),
-    ]);
+export async function ExtraProductsTableData({ q, page, limit }: ExtraProductsTableDataProps) {
+    const { page: currentPage, limit: currentLimit } = parsePaginationParams(page, limit);
+    const filters = {
+        ...(q && { q }),
+        page: currentPage,
+        limit: currentLimit,
+    };
+    const result = await getAllExtraProductsAction(filters);
 
     if (!result.success) {
         return <div>Error al obtener los productos</div>;
     }
 
-    const products = result.data ?? [];
-    const categories = categoriesResult.success ? categoriesResult.data ?? [] : [];
-
     return (
         <ExtraProductsTable
-            products={products}
-            categories={categories}
+            products={result.data?.items ?? []}
+            meta={result.data?.meta}
             q={q}
         />
     );

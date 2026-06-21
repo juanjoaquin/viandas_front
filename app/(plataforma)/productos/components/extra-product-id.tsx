@@ -12,19 +12,14 @@ import {
 } from "@/components/ui/tooltip";
 import { getExtraProductByIdAction } from "@/src/architecture/actions/extra-product/get-extra-product-by-id.action";
 import { TExtraProduct } from "@/src/architecture/core/domain/entities/ExtraProduct";
-import { TProductCategory } from "@/src/architecture/core/domain/entities/ProductCategory";
 import { DeleteExtraProductDialog } from "./delete-extra-product-dialog";
 import { EditExtraProductDialog } from "./edit-extra-product-dialog";
 
 type ExtraProductRowActionsProps = {
     product: TExtraProduct;
-    categories?: TProductCategory[];
 };
 
-export function ExtraProductID({
-    product,
-    categories = [],
-}: ExtraProductRowActionsProps) {
+export function ExtraProductID({ product }: ExtraProductRowActionsProps) {
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<TExtraProduct | null>(null);
@@ -96,7 +91,6 @@ export function ExtraProductID({
             {productToEdit && (
                 <EditExtraProductDialog
                     product={productToEdit}
-                    categories={categories}
                     open={editOpen}
                     onOpenChange={handleEditOpenChange}
                 />
