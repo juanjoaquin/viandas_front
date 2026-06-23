@@ -14,7 +14,7 @@ function MenuTypeBadge({ name }: { name: string }) {
     return (
         <Badge
             variant="secondary"
-            className="bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700"
+            className="bg-muted text-muted-foreground border-border"
         >
             {name}
         </Badge>
@@ -40,7 +40,7 @@ function getColumns(): ColumnDef<TDish>[] {
             key: "name",
             header: "Nombre",
             cell: (row) => (
-                <p className="truncate font-semibold text-slate-900 dark:text-slate-50">
+                <p className="truncate font-semibold text-foreground">
                     {row.name}
                 </p>
             ),

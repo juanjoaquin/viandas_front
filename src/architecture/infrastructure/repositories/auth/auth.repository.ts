@@ -1,7 +1,12 @@
 import { getHttpClient } from "@/src/architecture/infrastructure/http/api-config";
 import type { IHttpClient } from "@/src/architecture/infrastructure/http/types";
 import type { IAuthRepository } from "@/src/architecture/core/domain/repository/auth/i-auth.repository";
-import type { AuthTokens, LoginInput } from "@/src/architecture/core/domain/entities/Auth";
+import type {
+  AuthTokens,
+  LoginInput,
+  LogoutInput,
+  RegisterWithInviteInput,
+} from "@/src/architecture/core/domain/entities/Auth";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import type { Result } from "@/src/libs/result";
 
@@ -14,9 +19,26 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
+  async registerWithInvite(
+    input: RegisterWithInviteInput,
+  ): Promise<Result<null>> {
+    return await this.httpClient.post<null>("/auth/register-with-invite", input, {
+      allowNull: true,
+      tags: ["auth-register-with-invite"],
+    });
+  }
+
   async getMe(): Promise<Result<TUser>> {
     return await this.httpClient.get<TUser>("/auth/me", {
       tags: ["auth-me"],
     });
+  }
+
+  async logout(input: LogoutInput): Promise<Result<null>> {
+    return await this.httpClient.post<null>(
+      "/auth/logout",
+      { refresh_token: input.refreshToken },
+      { allowNull: true, tags: ["auth-logout"] },
+    );
   }
 }

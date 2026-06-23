@@ -16,7 +16,7 @@ export async function WeekMenuGridData({
     if (!allMenus.length) {
         return (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-card px-6 py-16 text-center shadow-sm">
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <p className="text-sm font-medium text-muted-foreground">
                     No hay menús semanales configurados
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">

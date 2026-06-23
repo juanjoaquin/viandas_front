@@ -17,6 +17,7 @@ const ROUTE_LABELS: Record<string, string> = {
   productos: "Productos",
   reportes: "Reportes",
   configuracion: "Configuración",
+  invitaciones: "Invitaciones",
 };
 
 function useBreadcrumbs() {
@@ -73,7 +74,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
             <RouteBackButton />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               {title}
             </h1>
             {description && (

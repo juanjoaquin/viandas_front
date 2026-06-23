@@ -60,7 +60,7 @@ export function SearchInput({
         onBlur={() => {
           isFocusedRef.current = false;
         }}
-        className="h-8 border-slate-200/70 bg-slate-100 pl-8 text-sm focus-visible:bg-background dark:border-slate-700 dark:bg-slate-800/60 dark:focus-visible:bg-background"
+        className="h-8 border-border bg-muted pl-8 text-sm focus-visible:bg-background"
       />
     </div>
   );

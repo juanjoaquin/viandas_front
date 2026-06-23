@@ -29,7 +29,7 @@ function getColumns(): ColumnDef<TDailyProduction>[] {
         header: "Cliente",
         cell: (row) => (
             <div className="min-w-0">
-                <p className="truncate text-base font-semibold text-slate-900 dark:text-slate-50">
+                <p className="truncate text-base font-semibold text-foreground">
                     {row.customer?.name ?? "Sin cliente"}
                 </p>
                 {row.customer?.type ? (
@@ -120,7 +120,7 @@ function getColumns(): ColumnDef<TDailyProduction>[] {
         cell: (row) =>
             row.delivery ? (
                 <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-50">
+                    <p className="text-sm font-medium text-foreground">
                         {row.delivery.name}
                     </p>
                     {row.delivery.phone ? (

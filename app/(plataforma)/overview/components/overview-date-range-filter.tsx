@@ -35,7 +35,7 @@ export function OverviewDateRangeFilter({ from, to }: OverviewDateRangeFilterPro
                     value={from}
                     max={to}
                     onChange={(event) => updateDate("from", event.target.value)}
-                    className="w-full flex-1 bg-slate-100 md:w-40 md:flex-none dark:bg-slate-800/60"
+                    className="w-full flex-1 bg-muted md:w-40 md:flex-none"
                 />
             </label>
 
@@ -46,7 +46,7 @@ export function OverviewDateRangeFilter({ from, to }: OverviewDateRangeFilterPro
                     value={to}
                     min={from}
                     onChange={(event) => updateDate("to", event.target.value)}
-                    className="w-full flex-1 bg-slate-100 md:w-40 md:flex-none dark:bg-slate-800/60"
+                    className="w-full flex-1 bg-muted md:w-40 md:flex-none"
                 />
             </label>
         </div>

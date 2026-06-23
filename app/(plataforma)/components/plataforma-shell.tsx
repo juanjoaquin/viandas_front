@@ -21,7 +21,7 @@ export function PlataformaShell({ user, children }: PlataformaShellProps) {
       <SidebarProvider>
         <AppSidebar user={user} />
         <SidebarInset>
-          <div className="flex flex-1 flex-col bg-slate-50 dark:bg-slate-900/50">
+          <div className="flex flex-1 flex-col bg-background">
             {children}
           </div>
         </SidebarInset>

@@ -14,7 +14,7 @@ function CategoryBadge({ category }: { category?: TProductCategory | null }) {
     return (
         <Badge
             variant="secondary"
-            className="bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700"
+            className="bg-muted text-muted-foreground border-border"
         >
             {category?.name ?? "Sin categoría"}
         </Badge>
@@ -47,7 +47,7 @@ const columns: ColumnDef<TExtraProduct>[] = [
         key: "name",
         header: "Nombre",
         cell: (row) => (
-            <p className="truncate font-semibold text-slate-900 dark:text-slate-50">
+            <p className="truncate font-semibold text-foreground">
                 {row.name}
             </p>
         ),
@@ -61,7 +61,7 @@ const columns: ColumnDef<TExtraProduct>[] = [
         key: "price",
         header: "Precio",
         cell: (row) => (
-            <p className="font-medium tabular-nums text-slate-900 dark:text-slate-50">
+            <p className="font-medium tabular-nums text-foreground">
                 {formatPrice(row.price)}
             </p>
         ),

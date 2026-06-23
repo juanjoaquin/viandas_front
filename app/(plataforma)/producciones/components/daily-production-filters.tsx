@@ -103,7 +103,7 @@ export function DailyProductionFilters({
                 >
                     <SelectTrigger
                         size="sm"
-                        className="h-8 w-full border-slate-200/70 bg-slate-100 text-sm md:w-44 dark:border-slate-700 dark:bg-slate-800/60"
+                        className="h-8 w-full border-border bg-muted text-sm md:w-44"
                     >
                         <SelectValue placeholder="Entrega" />
                     </SelectTrigger>
@@ -133,7 +133,7 @@ export function DailyProductionFilters({
                 >
                     <SelectTrigger
                         size="sm"
-                        className="h-8 w-full border-slate-200/70 bg-slate-100 text-sm md:w-52 dark:border-slate-700 dark:bg-slate-800/60"
+                        className="h-8 w-full border-border bg-muted text-sm md:w-52"
                     >
                         <SelectValue placeholder="Orden" />
                     </SelectTrigger>

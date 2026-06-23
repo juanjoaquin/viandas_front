@@ -58,7 +58,7 @@ export function DeliveryID({ delivery }: DeliveryRowActionsProps) {
                             size="icon-sm"
                             disabled={isLoading || isDeleting}
                             aria-label={`Editar ${delivery.name}`}
-                            className="border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                            className="border-border text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
                             onClick={() => void handleEdit()}
                         >
                             {isLoading ? (
@@ -78,7 +78,7 @@ export function DeliveryID({ delivery }: DeliveryRowActionsProps) {
                             size="icon-sm"
                             disabled={isLoading || isDeleting}
                             aria-label={`Eliminar ${delivery.name}`}
-                            className="border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-red-900/60 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                            className="border-border text-muted-foreground hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-900/60 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                             onClick={() => setDeleteOpen(true)}
                         >
                             <Trash2 className="size-3.5" />

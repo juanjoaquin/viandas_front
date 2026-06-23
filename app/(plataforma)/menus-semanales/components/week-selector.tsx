@@ -60,7 +60,7 @@ export function WeekSelector({ currentId, allMenus }: WeekSelectorProps) {
                 disabled={!hasPrev}
                 onClick={handlePrev}
                 aria-label="Semana anterior"
-                className="border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                className="border-border text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
             >
                 <ChevronLeft className="size-4" />
             </Button>
@@ -68,7 +68,7 @@ export function WeekSelector({ currentId, allMenus }: WeekSelectorProps) {
             <Select value={currentId} onValueChange={navigate}>
                 <SelectTrigger
                     size="sm"
-                    className="h-8 w-52 border-slate-200/70 bg-slate-100 text-sm dark:border-slate-700 dark:bg-slate-800/60"
+                    className="h-8 w-52 border-border bg-muted text-sm"
                 >
                     <SelectValue placeholder="Seleccionar semana" />
                 </SelectTrigger>
@@ -88,7 +88,7 @@ export function WeekSelector({ currentId, allMenus }: WeekSelectorProps) {
                 disabled={!hasNext}
                 onClick={handleNext}
                 aria-label="Semana siguiente"
-                className="border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                className="border-border text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
             >
                 <ChevronRight className="size-4" />
             </Button>

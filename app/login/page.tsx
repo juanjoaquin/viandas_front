@@ -39,16 +39,16 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+    <main className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-sm bg-card rounded-2xl shadow-sm border border-border p-8">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Iniciar sesión</h1>
-          <p className="mt-1 text-sm text-gray-500">Ingresá tus credenciales para continuar</p>
+          <h1 className="text-2xl font-semibold text-foreground">Iniciar sesión</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Ingresá tus credenciales para continuar</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground">
               Email
             </label>
             <input
@@ -58,16 +58,16 @@ export default function LoginPage() {
               autoComplete="email"
               required
               disabled={isPending}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
               placeholder="tu@email.com"
             />
             {fieldErrors.email && (
-              <p className="text-xs text-red-500">{fieldErrors.email}</p>
+              <p className="text-xs text-destructive">{fieldErrors.email}</p>
             )}
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground">
               Contraseña
             </label>
             <input
@@ -77,21 +77,21 @@ export default function LoginPage() {
               autoComplete="current-password"
               required
               disabled={isPending}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {isPending ? "Ingresando..." : "Ingresar"}
           </button>

@@ -122,7 +122,7 @@ function DataTableViewToggle({
   return (
     <div
       className={cn(
-        "flex h-8 shrink-0 items-center gap-0.5 rounded-lg border border-slate-200/70 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800/60",
+        "flex h-8 shrink-0 items-center gap-0.5 rounded-lg border border-border bg-muted p-1",
         className,
       )}
       role="group"

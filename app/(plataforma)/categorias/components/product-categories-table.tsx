@@ -28,7 +28,7 @@ const columns: ColumnDef<TProductCategory>[] = [
         key: "name",
         header: "Nombre",
         cell: (row) => (
-            <p className="truncate font-semibold text-slate-900 dark:text-slate-50">
+            <p className="truncate font-semibold text-foreground">
                 {row.name}
             </p>
         ),

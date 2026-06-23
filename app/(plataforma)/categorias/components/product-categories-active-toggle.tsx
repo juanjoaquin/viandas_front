@@ -36,7 +36,7 @@ export function ProductCategoriesActiveToggle({
     }
 
     return (
-        <div className="flex h-8 w-full items-center gap-0.5 rounded-lg border border-slate-200/70 bg-slate-100 p-1 md:inline-flex md:w-auto dark:border-slate-700 dark:bg-slate-800/60">
+        <div className="flex h-8 w-full items-center gap-0.5 rounded-lg border border-border bg-muted p-1 md:inline-flex md:w-auto">
             {OPTIONS.map((option) => {
                 const isActive = option.value === active;
                 return (

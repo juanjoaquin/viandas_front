@@ -129,9 +129,9 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
 
     return (
         <div className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                    <span className="text-sm font-semibold text-foreground">
                         Semana del {formatWeekRange(weekMenu.week_start_date, weekMenu.week_end_date)}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -154,29 +154,29 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
                 </div>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
                 <div
                     className="grid min-w-[820px] w-full text-sm"
                     style={{ gridTemplateColumns }}
                 >
-                    <div className="border-b border-r border-slate-100 bg-slate-50/70 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-500">
+                    <div className="border-b border-r border-border bg-muted/70 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         DÍA
                     </div>
                     {menuTypes.map((type, typeIdx) => (
                         <div
                             key={type.id}
                             className={cn(
-                                "border-b border-slate-100 px-4 py-3 text-center dark:border-slate-800",
+                                "border-b border-border px-4 py-3 text-center",
                                 typeIdx < menuTypes.length - 1 &&
-                                    "border-r border-slate-100 dark:border-slate-800",
+                                    "border-r border-border ",
                             )}
                         >
                             <div className="flex flex-col items-center gap-0.5 leading-tight">
-                                <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                                <span className="text-sm font-semibold text-foreground">
                                     {type.name}
                                 </span>
                                 {type.price != null && (
-                                    <span className="text-xs font-medium text-slate-400">
+                                    <span className="text-xs font-medium text-muted-foreground">
                                         ${type.price.toLocaleString("es-AR")}
                                     </span>
                                 )}
@@ -192,15 +192,15 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
                             <Fragment key={day}>
                                 <div
                                     className={cn(
-                                        "flex min-w-0 flex-col justify-center gap-0.5 border-r border-slate-100 bg-slate-50/70 px-4 py-5 dark:border-slate-800 dark:bg-slate-900/50",
+                                        "flex min-w-0 flex-col justify-center gap-0.5 border-r border-border bg-muted/70 px-4 py-5",
                                         !isLastRow &&
-                                            "border-b border-slate-100 dark:border-slate-800",
+                                            "border-b border-border ",
                                     )}
                                 >
-                                    <span className="text-sm font-bold text-slate-900 dark:text-slate-50">
+                                    <span className="text-sm font-bold text-foreground">
                                         {short}
                                     </span>
-                                    <span className="hidden text-xs leading-tight text-slate-500 sm:block dark:text-slate-400">
+                                    <span className="hidden text-xs leading-tight text-muted-foreground sm:block">
                                         {full}
                                     </span>
                                 </div>
@@ -214,9 +214,9 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
                                             className={cn(
                                                 "min-w-0 px-3 py-2.5",
                                                 typeIdx < menuTypes.length - 1 &&
-                                                    "border-r border-slate-100 dark:border-slate-800",
+                                                    "border-r border-border ",
                                                 !isLastRow &&
-                                                    "border-b border-slate-100 dark:border-slate-800",
+                                                    "border-b border-border ",
                                             )}
                                         >
                                             <WeekMenuCell
@@ -234,14 +234,14 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/60">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted px-4 py-4">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                     {summaryByType.map(({ type, count }) => (
                         <span
                             key={type.id}
-                            className="text-sm text-slate-600 dark:text-slate-300"
+                            className="text-sm text-muted-foreground"
                         >
-                            <span className="font-semibold text-slate-900 dark:text-slate-50">
+                            <span className="font-semibold text-foreground">
                                 {count}
                             </span>{" "}
                             {type.name}
@@ -250,10 +250,10 @@ export function WeekMenuGrid({ weekMenu, menuTypes, allMenus }: WeekMenuGridProp
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">
+                    <span className="text-muted-foreground">
                         Total estimado
                     </span>
-                    <span className="font-bold text-slate-900 dark:text-slate-50">
+                    <span className="font-bold text-foreground">
                         ${totalEstimated.toLocaleString("es-AR")}
                     </span>
                 </div>

@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import {
   CalendarDays,
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
+  LogOut,
+  MailPlus,
   Motorbike,
   Package,
   Soup,
@@ -17,6 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
+import { logoutAction } from "@/src/architecture/actions/auth/logout.action";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import {
@@ -88,6 +91,11 @@ const navItems = [
     title: "Producciones",
     url: "/producciones",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Invitaciones",
+    url: "/invitaciones",
+    icon: MailPlus,
   },
 ] as const;
 
@@ -171,11 +179,23 @@ type AppSidebarProps = {
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { setOpenMobile } = useSidebar();
+  const [isLoggingOut, startLogoutTransition] = useTransition();
 
   useEffect(() => {
     setOpenMobile(false);
   }, [pathname, setOpenMobile]);
+
+  function handleLogout() {
+    startLogoutTransition(async () => {
+      const result = await logoutAction();
+      if (result.success) {
+        router.push("/login");
+        router.refresh();
+      }
+    });
+  }
 
   const initials = user.name
     .split(" ")
@@ -186,7 +206,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="gap-1 pb-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
@@ -195,10 +215,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <UtensilsCrossed className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold tracking-tight">
+                  <span className="truncate font-semibold tracking-tight text-sidebar-foreground">
                     Viandas
                   </span>
-                  <span className="truncate text-xs text-sidebar-foreground/60">
+                  <span className="truncate text-xs text-sidebar-foreground">
                     Plataforma
                   </span>
                 </div>
@@ -208,9 +228,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest font-medium text-sidebar-foreground/40">
+      <SidebarContent className="pt-0">
+        <SidebarGroup className="px-2 pb-2 pt-1">
+          <SidebarGroupLabel className="h-6 text-[11px] uppercase tracking-widest font-medium text-sidebar-foreground/40">
             Navegación
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -261,23 +281,33 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <div className="mx-3 h-px bg-sidebar-border" />
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" tooltip={`${user.name} — ${user.email}`}>
-              <div className="relative flex aspect-square size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold shadow-sm">
-                {initials}
-                <span className="absolute bottom-0 right-0 size-2 rounded-full bg-green-400 ring-1 ring-sidebar" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs text-sidebar-foreground/60">
-                  {user.email}
-                </span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="gap-1.5 group-data-[collapsible=icon]:p-1">
+        <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/50 px-2.5 py-2 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+          <div className="flex items-center gap-2.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-1.5">
+            <div className="relative flex aspect-square size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold shadow-sm">
+              {initials}
+              <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-400 ring-2 ring-sidebar/80" />
+            </div>
+            <div className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-sm font-semibold text-sidebar-foreground">
+                {user.name}
+              </span>
+              <span className="truncate text-xs text-sidebar-foreground">
+                {user.email}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              aria-label="Cerrar sesión"
+              title="Cerrar sesión"
+              className="flex size-8 shrink-0 items-center justify-center rounded-md border border-sidebar-border bg-sidebar-accent text-sidebar-foreground transition-colors hover:bg-sidebar-accent/80 hover:text-sidebar-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:hover:bg-sidebar-accent"
+            >
+              <LogOut className="size-4 shrink-0" />
+            </button>
+          </div>
+        </div>
       </SidebarFooter>
 
       <SidebarRail />

@@ -38,10 +38,10 @@ export function WeekMenuCell({
                 <button
                     type="button"
                     onClick={() => setAddOpen(true)}
-                    className="group flex min-h-[92px] cursor-pointer w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-transparent px-4 py-6 text-sm text-slate-400 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100/60 hover:text-slate-500 dark:border-slate-800 dark:text-slate-500 dark:hover:border-slate-700 dark:hover:bg-slate-800/50 dark:hover:text-slate-400"
+                    className="group flex min-h-[92px] cursor-pointer w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-transparent px-4 py-6 text-sm text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-muted-foreground"
                     aria-label={`Asignar plato para ${menuType.name}`}
                 >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors group-hover:bg-slate-200 group-hover:text-slate-600 dark:bg-slate-800 dark:group-hover:bg-slate-700">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-foreground">
                         <Plus className="size-4" />
                     </span>
                     <span className="text-xs font-medium">Agregar</span>
@@ -60,9 +60,9 @@ export function WeekMenuCell({
 
     return (
         <>
-            <div className="flex min-h-[92px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex min-h-[92px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-4 dark:border-border dark:bg-card">
                 <div className="flex w-full min-w-0 flex-col items-center">
-                    <p className="line-clamp-2 text-center text-base font-semibold leading-snug text-slate-900 dark:text-slate-100">
+                    <p className="line-clamp-2 text-center text-base font-semibold leading-snug text-foreground">
                         {item.dish?.name ?? (
                             <span className="italic text-muted-foreground">Sin nombre</span>
                         )}
@@ -79,7 +79,7 @@ export function WeekMenuCell({
                                 aria-label="Cambiar plato"
                                 disabled={isDeleting}
                                 onClick={() => setEditOpen(true)}
-                                className="size-7 rounded-lg border border-slate-200 bg-white/90 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900 dark:border-slate-700 dark:bg-slate-950/90 dark:text-slate-300 dark:hover:bg-slate-950"
+                                className="size-7 rounded-lg border border-border bg-card/90 text-muted-foreground shadow-sm hover:bg-card hover:text-foreground"
                             >
                                 <Pencil className="size-3" />
                             </Button>
@@ -96,7 +96,7 @@ export function WeekMenuCell({
                                 aria-label="Quitar plato"
                                 disabled={isDeleting}
                                 onClick={() => setDeleteOpen(true)}
-                                className="size-7 rounded-lg border border-slate-200 bg-white/90 text-red-500 shadow-sm hover:bg-white hover:text-red-600 dark:border-slate-700 dark:bg-slate-950/90 dark:hover:bg-slate-950"
+                                className="size-7 rounded-lg border border-border bg-card/90 text-red-500 shadow-sm hover:bg-card hover:text-red-600"
                             >
                                 {isDeleting ? (
                                     <Loader2 className="size-3 animate-spin" />
