@@ -287,7 +287,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <span className="truncate font-semibold tracking-tight text-sidebar-foreground">
                     Viandapp
                   </span>
-                  <span className="truncate text-xs text-sidebar-foreground">
+                  <span className="truncate text-xs text-gray-400">
                     Plataforma
                   </span>
                 </div>

@@ -1,12 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginAction } from "@/src/architecture/actions/auth/login.action";
 import type { LoginInput } from "@/src/architecture/core/domain/entities/Auth";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageShell />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageShell() {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-sidebar px-4 py-12">
+      <div className="flex w-full max-w-4xl flex-col items-center gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+        <div className="max-w-md text-center lg:text-left">
+          <h1 className="text-5xl font-semibold tracking-tight text-white lg:text-6xl">Viandapp</h1>
+          <p className="mt-2 text-lg font-medium text-white/70">Plataforma de gestión de viandas</p>
+        </div>
+        <div className="w-full max-w-sm shrink-0 bg-card rounded-2xl shadow-sm border border-border p-8">
+          <p className="text-sm text-muted-foreground text-center">Cargando...</p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const passwordReset = searchParams.get("reset") === "1";

@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_rethrow } from "next/navigation";
 import type { Result } from "@/src/libs/result";
 import { Err } from "@/src/libs/result";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
@@ -40,6 +41,8 @@ export async function getMeAction(): Promise<Result<TUser>> {
 
     return result;
   } catch (error) {
+    unstable_rethrow(error);
+
     Logger.error(
       "[ACTION][GET-ME] Unexpected error",
       error,
