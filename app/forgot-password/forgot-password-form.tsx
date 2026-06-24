@@ -64,17 +64,18 @@ export function ForgotPasswordForm() {
 
   if (submitted) {
     return (
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center size-12 rounded-full bg-primary/10 mx-auto">
+      <div className="space-y-4 text-center">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10">
           <Mail className="size-6 text-primary" />
         </div>
         <h2 className="text-xl font-semibold text-foreground">Revisá tu email</h2>
         <p className="text-sm text-muted-foreground">
-          Si ese email está registrado, te enviamos un link para restablecer tu contraseña. El link es válido por 1 hora.
+          Si ese email está registrado, te enviamos un link para restablecer tu
+          contraseña. El link es válido por 1 hora.
         </p>
         <Link
           href="/login"
-          className="block text-sm font-medium text-primary hover:underline mt-2"
+          className="mt-2 block text-sm font-medium text-primary hover:underline"
         >
           Volver al inicio de sesión
         </Link>
