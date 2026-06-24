@@ -45,87 +45,98 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-sm bg-card rounded-2xl shadow-sm border border-border p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-foreground">Iniciar sesión</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Ingresá tus credenciales para continuar</p>
+    <main className="min-h-screen flex items-center justify-center bg-sidebar px-4 py-12">
+      <div className="flex w-full max-w-4xl flex-col items-center gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+        <div className="max-w-md text-center lg:text-left">
+          <h1 className="text-5xl font-semibold tracking-tight text-white lg:text-6xl">Viandapp</h1>
+          <p className="mt-2 text-lg font-medium text-white/70">Plataforma de gestión de viandas</p>
+          <p className="mt-4 text-sm leading-relaxed text-white/65">
+            Gestioná clientes, menús semanales, producción y entregas desde un solo lugar.
+            Organizá tu operación diaria de forma simple y eficiente.
+          </p>
         </div>
 
-        {accountInactive && (
-          <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
-            <p className="text-sm text-destructive">
-              Tu cuenta fue desactivada. Contactá al administrador.
-            </p>
-          </div>
-        )}
-
-        {passwordReset && (
-          <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/30 px-3 py-2">
-            <p className="text-sm text-green-700 dark:text-green-400">
-              Contraseña restablecida correctamente. Ya podés iniciar sesión.
-            </p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
-          <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm font-medium text-foreground">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              disabled={isPending}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
-              placeholder="tu@email.com"
-            />
-            {fieldErrors.email && (
-              <p className="text-xs text-destructive">{fieldErrors.email}</p>
-            )}
+        <div className="w-full max-w-sm shrink-0 bg-card rounded-2xl shadow-sm border border-border p-8">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold text-foreground">Iniciar sesión</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Ingresá tus credenciales para continuar</p>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                Contraseña
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-primary hover:underline"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              disabled={isPending}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
-              <p className="text-sm text-destructive">{error}</p>
+          {accountInactive && (
+            <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
+              <p className="text-sm text-destructive">
+                Tu cuenta fue desactivada. Contactá al administrador.
+              </p>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-          >
-            {isPending ? "Ingresando..." : "Ingresar"}
-          </button>
-        </form>
+          {passwordReset && (
+            <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/30 px-3 py-2">
+              <p className="text-sm text-green-700 dark:text-green-400">
+                Contraseña restablecida correctamente. Ya podés iniciar sesión.
+              </p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            <div className="space-y-1">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                disabled={isPending}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
+                placeholder="tu@email.com"
+              />
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive">{fieldErrors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                  Contraseña
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                disabled={isPending}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
+                placeholder="••••••••"
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {isPending ? "Ingresando..." : "Ingresar"}
+            </button>
+          </form>
+        </div>
       </div>
     </main>
   );
