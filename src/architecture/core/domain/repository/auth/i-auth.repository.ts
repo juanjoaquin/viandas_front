@@ -1,9 +1,11 @@
 import type { Result } from "@/src/libs/result";
 import type {
   AuthTokens,
+  ForgotPasswordInput,
   LoginInput,
   LogoutInput,
   RegisterWithInviteInput,
+  ResetPasswordInput,
 } from "@/src/architecture/core/domain/entities/Auth";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 
@@ -12,4 +14,6 @@ export interface IAuthRepository {
   registerWithInvite(input: RegisterWithInviteInput): Promise<Result<null>>;
   getMe(): Promise<Result<TUser>>;
   logout(input: LogoutInput): Promise<Result<null>>;
+  forgotPassword(input: ForgotPasswordInput): Promise<Result<null>>;
+  resetPassword(input: ResetPasswordInput): Promise<Result<null>>;
 }

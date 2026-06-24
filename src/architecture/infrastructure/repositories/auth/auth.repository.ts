@@ -3,9 +3,11 @@ import type { IHttpClient } from "@/src/architecture/infrastructure/http/types";
 import type { IAuthRepository } from "@/src/architecture/core/domain/repository/auth/i-auth.repository";
 import type {
   AuthTokens,
+  ForgotPasswordInput,
   LoginInput,
   LogoutInput,
   RegisterWithInviteInput,
+  ResetPasswordInput,
 } from "@/src/architecture/core/domain/entities/Auth";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import type { Result } from "@/src/libs/result";
@@ -40,5 +42,19 @@ export class AuthRepository implements IAuthRepository {
       { refresh_token: input.refreshToken },
       { allowNull: true, tags: ["auth-logout"] },
     );
+  }
+
+  async forgotPassword(input: ForgotPasswordInput): Promise<Result<null>> {
+    return await this.httpClient.post<null>("/auth/forgot-password", input, {
+      allowNull: true,
+      tags: ["auth-forgot-password"],
+    });
+  }
+
+  async resetPassword(input: ResetPasswordInput): Promise<Result<null>> {
+    return await this.httpClient.post<null>("/auth/reset-password", input, {
+      allowNull: true,
+      tags: ["auth-reset-password"],
+    });
   }
 }

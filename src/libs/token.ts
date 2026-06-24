@@ -21,14 +21,23 @@ export async function getAccessToken() {
 
     setLogContext({ hadAccessToken, hadRefreshToken, attemptedRefresh: true });
 
-    const newToken = await refreshTokensAction();
+    const result = await refreshTokensAction();
 
-    if (!newToken) {
+    if (result.status === "success") {
+        return result.accessToken;
+    }
+
+    if (result.status === "inactive") {
+        Logger.warn("[TOKEN] Refresh failed — account inactive", {
+            hadAccessToken,
+            hadRefreshToken,
+        });
+    } else {
         Logger.warn("[TOKEN] Refresh failed — no access token available", {
             hadAccessToken,
             hadRefreshToken,
         });
     }
 
-    return newToken;
+    return null;
 }

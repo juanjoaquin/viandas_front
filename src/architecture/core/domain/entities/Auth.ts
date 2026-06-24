@@ -11,8 +11,31 @@ export const registerWithInviteInputSchema = z.object({
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
+export const forgotPasswordInputSchema = z.object({
+  email: z.email("Email inválido"),
+});
+
+export const resetPasswordInputSchema = z.object({
+  token: z.string().min(1, "Token requerido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+});
+
+export const resetPasswordFormSchema = resetPasswordInputSchema
+  .extend({
+    confirmPassword: z
+      .string()
+      .min(6, "La contraseña debe tener al menos 6 caracteres"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden.",
+    path: ["confirmPassword"],
+  });
+
 export type LoginInput = z.infer<typeof loginInputSchema>;
 export type RegisterWithInviteInput = z.infer<typeof registerWithInviteInputSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordInputSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordInputSchema>;
+export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>;
 
 export type AuthTokens = {
   accessToken: string;

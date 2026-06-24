@@ -3,9 +3,13 @@ import { refreshTokensAction } from "@/src/architecture/actions/auth/refresh-tok
 
 async function handleRefresh(request: NextRequest) {
   const redirectTo = request.nextUrl.searchParams.get("redirect") || "/";
-  const newToken = await refreshTokensAction();
+  const result = await refreshTokensAction();
 
-  if (!newToken) {
+  if (result.status === "inactive") {
+    return NextResponse.redirect(new URL("/login?inactive=1", request.url));
+  }
+
+  if (result.status === "failed") {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

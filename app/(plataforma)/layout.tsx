@@ -21,5 +21,12 @@ export default async function PlataformaLayout({
     redirect("/login");
   }
 
+  if (!result.data.active) {
+    const cookieStore = await cookies();
+    cookieStore.delete("accessToken");
+    cookieStore.delete("refreshToken");
+    redirect("/login?inactive=1");
+  }
+
   return <PlataformaShell user={result.data}>{children}</PlataformaShell>;
 }

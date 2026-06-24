@@ -14,6 +14,7 @@ import {
   Package,
   Soup,
   Tags,
+  UserCircle,
   Users,
   UtensilsCrossed,
   type LucideIcon,
@@ -96,6 +97,11 @@ const navItems = [
     title: "Invitaciones",
     url: "/invitaciones",
     icon: MailPlus,
+  },
+  {
+    title: "Usuarios",
+    url: "/usuarios",
+    icon: UserCircle,
   },
 ] as const;
 

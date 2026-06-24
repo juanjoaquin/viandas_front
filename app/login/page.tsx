@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginAction } from "@/src/architecture/actions/auth/login.action";
 import type { LoginInput } from "@/src/architecture/core/domain/entities/Auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const passwordReset = searchParams.get("reset") === "1";
+  const accountInactive = searchParams.get("inactive") === "1";
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<LoginInput>>({});
@@ -31,6 +35,8 @@ export default function LoginPage() {
           setFieldErrors({ email: result.error });
         } else if (result.code === "UNAUTHORIZED") {
           setError("Email o contraseña incorrectos");
+        } else if (result.code === "FORBIDDEN") {
+          setError(result.error ?? "Tu cuenta fue desactivada. Contactá al administrador.");
         } else {
           setError(result.error ?? "Error al iniciar sesión");
         }
@@ -45,6 +51,22 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold text-foreground">Iniciar sesión</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ingresá tus credenciales para continuar</p>
         </div>
+
+        {accountInactive && (
+          <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
+            <p className="text-sm text-destructive">
+              Tu cuenta fue desactivada. Contactá al administrador.
+            </p>
+          </div>
+        )}
+
+        {passwordReset && (
+          <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/30 px-3 py-2">
+            <p className="text-sm text-green-700 dark:text-green-400">
+              Contraseña restablecida correctamente. Ya podés iniciar sesión.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="space-y-1">
@@ -67,9 +89,17 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="password" className="block text-sm font-medium text-foreground">
-              Contraseña
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                Contraseña
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-muted-foreground hover:text-primary hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <input
               id="password"
               name="password"

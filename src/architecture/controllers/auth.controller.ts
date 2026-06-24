@@ -1,9 +1,11 @@
 import { Err, type Result } from "@/src/libs/result";
 import type {
   AuthTokens,
+  ForgotPasswordInput,
   LoginInput,
   LogoutInput,
   RegisterWithInviteInput,
+  ResetPasswordInput,
 } from "@/src/architecture/core/domain/entities/Auth";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import type { IAuthRepository } from "@/src/architecture/core/domain/repository/auth/i-auth.repository";
@@ -12,6 +14,8 @@ import { loginUseCase } from "@/src/architecture/use-cases/auth/login.use-case";
 import { getMeUseCase } from "@/src/architecture/use-cases/auth/get-me.use-case";
 import { logoutUseCase } from "@/src/architecture/use-cases/auth/logout.use-case";
 import { registerWithInviteUseCase } from "@/src/architecture/use-cases/auth/register-with-invite.use-case";
+import { forgotPasswordUseCase } from "@/src/architecture/use-cases/auth/forgot-password.use-case";
+import { resetPasswordUseCase } from "@/src/architecture/use-cases/auth/reset-password.use-case";
 
 export class AuthController {
 
@@ -109,6 +113,56 @@ export class AuthController {
     } catch (error) {
       Logger.error(
         "[AUTH-CONTROLLER][LOGOUT] Unexpected error",
+        error,
+      );
+
+      return Err(
+        error instanceof Error ? error.message : "Error desconocido",
+        "UNKNOWN",
+      );
+    }
+  }
+
+  async forgotPassword(input: ForgotPasswordInput): Promise<Result<null>> {
+    try {
+      const result = await forgotPasswordUseCase(this.repository, input);
+
+      if (!result.success) {
+        Logger.error(
+          "[AUTH-CONTROLLER][FORGOT-PASSWORD] Controller returned error",
+          { error: result.error, code: result.code },
+        );
+      }
+
+      return result;
+    } catch (error) {
+      Logger.error(
+        "[AUTH-CONTROLLER][FORGOT-PASSWORD] Unexpected error",
+        error,
+      );
+
+      return Err(
+        error instanceof Error ? error.message : "Error desconocido",
+        "UNKNOWN",
+      );
+    }
+  }
+
+  async resetPassword(input: ResetPasswordInput): Promise<Result<null>> {
+    try {
+      const result = await resetPasswordUseCase(this.repository, input);
+
+      if (!result.success) {
+        Logger.error(
+          "[AUTH-CONTROLLER][RESET-PASSWORD] Controller returned error",
+          { error: result.error, code: result.code },
+        );
+      }
+
+      return result;
+    } catch (error) {
+      Logger.error(
+        "[AUTH-CONTROLLER][RESET-PASSWORD] Unexpected error",
         error,
       );
 

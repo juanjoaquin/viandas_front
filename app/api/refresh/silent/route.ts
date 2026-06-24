@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { refreshTokensAction } from "@/src/architecture/actions/auth/refresh-tokens.action";
 
 export async function GET() {
-  const newToken = await refreshTokensAction();
+  const result = await refreshTokensAction();
 
-  if (!newToken) {
+  if (result.status === "inactive") {
+    return NextResponse.json({ ok: false, inactive: true }, { status: 403 });
+  }
+
+  if (result.status === "failed") {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 
