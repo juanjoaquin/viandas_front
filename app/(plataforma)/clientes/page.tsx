@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Clientes",
+  description:
+    "Gestioná eficientemente tus viandas de personas y empresas. Controlá tipos de menús, turnos y etiquetas de despacho.",
+};
 import { CustomersTableData } from "./components/customers-table-data";
 import { CustomersTableSkeleton } from "./components/customers-table-skeleton";
 import { CreateCustomerDialog } from "./components/create-customer-dialog";

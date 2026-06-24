@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { RegisterForm } from "./register-form";
+
+export const metadata: Metadata = {
+  title: "Crear cuenta",
+  description: "Completá tus datos para aceptar la invitación",
+};
 
 type RegisterPageProps = {
   searchParams: Promise<{

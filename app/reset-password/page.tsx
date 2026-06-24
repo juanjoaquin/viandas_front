@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ResetPasswordForm } from "./reset-password-form";
+
+export const metadata: Metadata = {
+  title: "Nueva contraseña",
+  description: "Ingresá tu nueva contraseña para restablecer el acceso.",
+};
 
 type ResetPasswordPageProps = {
   searchParams: Promise<{

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Deliverys",
+    description: "Gestioná eficientemente tus deliverys. Controlá nombres, teléfonos y activos.",
+};
 import { PageHeader } from "../components/page-header";
 import { DeliverysTableSkeleton } from "./components/delivery-table-skeleton";
 import { DeliveriesTableData } from "./components/deliveries-data";

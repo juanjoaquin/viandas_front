@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Categorías",
+    description: "Gestioná las categorías para organizar los productos.",
+};
 import { PageHeader } from "../components/page-header";
 import { CreateProductCategoryDialog } from "./components/create-product-category-dialog";
 import { ProductCategoriesTableData } from "./components/product-categories-table-data";

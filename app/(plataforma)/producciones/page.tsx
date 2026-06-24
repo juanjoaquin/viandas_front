@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Producción Diaria",
+    description: "Gestioná las viandas de cada día por cliente, entrega y tipo de menú.",
+};
 import {
     dailyProductionSortOptions,
     fulfillmentTypes,

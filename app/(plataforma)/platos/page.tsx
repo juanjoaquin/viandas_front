@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Platos",
+    description:
+        "Consultá los platos registrados. Filtrá por tipo de menú o nombre y revisá su estado.",
+};
 import { PageHeader } from "../components/page-header";
 import { DishesTableData } from "./components/dishes-table-data";
 import { DishesTableSkeleton } from "./components/dishes-table-skeleton";

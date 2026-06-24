@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Productos",
+    description: "Administrá productos extra y asocialos a una categoría.",
+};
 import { PageHeader } from "../components/page-header";
 import { CreateExtraProductDialog } from "./components/create-extra-product-dialog";
 import { ExtraProductsTableData } from "./components/extra-products-table-data";

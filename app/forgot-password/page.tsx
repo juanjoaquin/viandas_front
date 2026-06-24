@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ForgotPasswordForm } from "./forgot-password-form";
+
+export const metadata: Metadata = {
+  title: "Olvidé mi contraseña",
+  description: "Ingresá tu email y te enviamos un link para restablecerla.",
+};
 
 export default function ForgotPasswordPage() {
   return (

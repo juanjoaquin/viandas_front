@@ -41,7 +41,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const navItems = [
+const appNavItems = [
   {
     title: "Overview",
     url: "/overview",
@@ -93,6 +93,9 @@ const navItems = [
     url: "/producciones",
     icon: ClipboardCheck,
   },
+] as const;
+
+const usersNavItems = [
   {
     title: "Invitaciones",
     url: "/invitaciones",
@@ -105,11 +108,26 @@ const navItems = [
   },
 ] as const;
 
+const sectionLabelClassName =
+  "h-6 text-[11px] tracking-widest font-medium text-sidebar-foreground/40";
+
 type NavChild = {
   title: string;
   url: string;
   icon: LucideIcon;
 };
+
+type NavItem =
+  | {
+      title: string;
+      url: string;
+      icon: LucideIcon;
+    }
+  | {
+      title: string;
+      icon: LucideIcon;
+      children: readonly NavChild[];
+    };
 
 type CollapsibleNavItemProps = {
   title: string;
@@ -117,6 +135,51 @@ type CollapsibleNavItemProps = {
   subItems: readonly NavChild[];
   pathname: string;
 };
+
+function NavMenuItems({
+  items,
+  pathname,
+}: {
+  items: readonly NavItem[];
+  pathname: string;
+}) {
+  return (
+    <SidebarMenu className="gap-1">
+      {items.map((item) => {
+        const hasChildren = "children" in item;
+
+        if (hasChildren) {
+          return (
+            <CollapsibleNavItem
+              key={item.title}
+              title={item.title}
+              icon={item.icon}
+              subItems={item.children}
+              pathname={pathname}
+            />
+          );
+        }
+
+        return (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton
+              asChild
+              isActive={
+                pathname === item.url || pathname.startsWith(`${item.url}/`)
+              }
+              tooltip={item.title}
+            >
+              <Link href={item.url}>
+                <item.icon />
+                <span>{item.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+}
 
 function CollapsibleNavItem({
   title,
@@ -236,45 +299,22 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarContent className="pt-0">
         <SidebarGroup className="px-2 pb-2 pt-1">
-          <SidebarGroupLabel className="h-6 text-[11px] uppercase tracking-widest font-medium text-sidebar-foreground/40">
+          <SidebarGroupLabel
+            className={cn(sectionLabelClassName, "uppercase")}
+          >
             Navegación
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {navItems.map((item) => {
-                const hasChildren = "children" in item;
+            <NavMenuItems items={appNavItems} pathname={pathname} />
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-                if (hasChildren) {
-                  return (
-                    <CollapsibleNavItem
-                      key={item.title}
-                      title={item.title}
-                      icon={item.icon}
-                      subItems={item.children}
-                      pathname={pathname}
-                    />
-                  );
-                }
-
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={
-                        pathname === item.url ||
-                        pathname.startsWith(`${item.url}/`)
-                      }
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+        <SidebarGroup className="px-2 pb-2 pt-1">
+          <SidebarGroupLabel className={sectionLabelClassName}>
+            Usuarios
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <NavMenuItems items={usersNavItems} pathname={pathname} />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

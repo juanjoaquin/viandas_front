@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { PageHeader } from "../components/page-header";
 import { InviteEmployeeForm } from "./components/invite-employee-form";
+
+export const metadata: Metadata = {
+  title: "Invitaciones",
+  description:
+    "Invitá empleados a la plataforma. Se les enviará un enlace por email para completar su registro.",
+};
 
 export default function InvitacionesPage() {
   return (

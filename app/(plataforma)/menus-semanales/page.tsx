@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Menú Semanal",
+    description: "Configurá los platos de cada semana por tipo de menú.",
+};
 import { PageHeader } from "../components/page-header";
 import { getAllWeekMenusAction } from "@/src/architecture/actions/week-menu/get-all-week-menus.action";
 import { CreateWeekDialog } from "./components/create-week-dialog";

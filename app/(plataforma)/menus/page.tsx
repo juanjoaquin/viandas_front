@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Menús",
+    description: "Gestioná los tipos de menú. Controlá nombres, precios y estado activo.",
+};
 import { PageHeader } from "../components/page-header";
 import { MenusTableData } from "./components/menus-table-data";
 import { CreateMenuDialog } from "./components/create-menu-dialog";

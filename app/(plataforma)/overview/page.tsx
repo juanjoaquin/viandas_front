@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+    title: "Overview",
+    description: "Consultá cantidades y montos de menús y productos por rango de fechas.",
+};
 import { PageHeader } from "../components/page-header";
 import { OverviewDateRangeFilter } from "./components/overview-date-range-filter";
 import { ProductionOverviewData } from "./components/production-overview-data";
