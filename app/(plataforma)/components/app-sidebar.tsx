@@ -21,6 +21,16 @@ import {
 } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import { logoutAction } from "@/src/architecture/actions/auth/logout.action";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import {
@@ -251,6 +261,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const [isLoggingOut, startLogoutTransition] = useTransition();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   useEffect(() => {
     setOpenMobile(false);
@@ -344,7 +355,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             </div>
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={() => setLogoutDialogOpen(true)}
               disabled={isLoggingOut}
               aria-label="Cerrar sesión"
               title="Cerrar sesión"
@@ -355,6 +366,34 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </div>
         </div>
       </SidebarFooter>
+
+      <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vas a salir de tu cuenta. Tendrás que iniciar sesión de nuevo para
+              volver a la plataforma.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLoggingOut}
+              onClick={(event) => {
+                event.preventDefault();
+                handleLogout();
+              }}
+            >
+              <LogOut data-icon="inline-start" />
+              {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <SidebarRail />
     </Sidebar>
