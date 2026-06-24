@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import type { TUser } from "@/src/architecture/core/domain/entities/User";
 import { logoutAction } from "@/src/architecture/actions/auth/logout.action";
+import { filterNavItemsByRole } from "@/src/libs/permissions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -262,6 +263,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const { setOpenMobile } = useSidebar();
   const [isLoggingOut, startLogoutTransition] = useTransition();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const visibleUsersNavItems = filterNavItemsByRole(usersNavItems, user.role);
 
   useEffect(() => {
     setOpenMobile(false);
@@ -320,14 +322,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="px-2 pb-2 pt-1">
-          <SidebarGroupLabel className={sectionLabelClassName}>
-            Usuarios
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <NavMenuItems items={usersNavItems} pathname={pathname} />
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleUsersNavItems.length > 0 && (
+          <SidebarGroup className="px-2 pb-2 pt-1">
+            <SidebarGroupLabel className={sectionLabelClassName}>
+              Usuarios
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <NavMenuItems items={visibleUsersNavItems} pathname={pathname} />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarMenu className="px-2">

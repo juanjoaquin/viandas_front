@@ -31,7 +31,7 @@ function DeliveryAvatar({ name }: { name: string }) {
     );
 }
 
-    const columns: ColumnDef<TDelivery>[] = [
+const columns: ColumnDef<TDelivery>[] = [
     {
         key: "name",
         header: "Nombre",

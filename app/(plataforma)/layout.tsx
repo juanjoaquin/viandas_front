@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getMeAction } from "@/src/architecture/actions/auth/get-me.action";
+import { canAccessRoute } from "@/src/libs/permissions";
 import { PlataformaShell } from "./components/plataforma-shell";
 
 export default async function PlataformaLayout({
@@ -26,6 +27,11 @@ export default async function PlataformaLayout({
     cookieStore.delete("accessToken");
     cookieStore.delete("refreshToken");
     redirect("/login?inactive=1");
+  }
+
+  const pathname = (await headers()).get("x-pathname") ?? "/";
+  if (!canAccessRoute(result.data.role, pathname)) {
+    redirect("/overview");
   }
 
   return <PlataformaShell user={result.data}>{children}</PlataformaShell>;

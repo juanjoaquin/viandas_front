@@ -8,6 +8,7 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "./app-sidebar";
 import { TokenRefresher } from "./token-refresher";
+import { UserProvider } from "./user-context";
 
 type PlataformaShellProps = {
   user: TUser;
@@ -16,16 +17,18 @@ type PlataformaShellProps = {
 
 export function PlataformaShell({ user, children }: PlataformaShellProps) {
   return (
-    <TooltipProvider>
-      <TokenRefresher />
-      <SidebarProvider>
-        <AppSidebar user={user} />
-        <SidebarInset>
-          <div className="flex flex-1 flex-col bg-background">
-            {children}
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
+    <UserProvider user={user}>
+      <TooltipProvider>
+        <TokenRefresher />
+        <SidebarProvider>
+          <AppSidebar user={user} />
+          <SidebarInset>
+            <div className="flex flex-1 flex-col bg-background">
+              {children}
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
+    </UserProvider>
   );
 }
