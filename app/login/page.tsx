@@ -5,6 +5,10 @@ import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginAction } from "@/src/architecture/actions/auth/login.action";
 import type { LoginInput } from "@/src/architecture/core/domain/entities/Auth";
+import {
+  ACCOUNT_ACCESS_DENIED_MESSAGE,
+  ACCOUNT_ACCESS_DENIED_TITLE,
+} from "@/src/libs/auth-messages";
 
 export default function LoginPage() {
   return (
@@ -60,7 +64,7 @@ function LoginPageContent() {
         } else if (result.code === "UNAUTHORIZED") {
           setError("Email o contraseña incorrectos");
         } else if (result.code === "FORBIDDEN") {
-          setError(result.error ?? "Tu cuenta fue desactivada. Contactá al administrador.");
+          setError(ACCOUNT_ACCESS_DENIED_MESSAGE);
         } else {
           setError(result.error ?? "Error al iniciar sesión");
         }
@@ -87,9 +91,12 @@ function LoginPageContent() {
           </div>
 
           {accountInactive && (
-            <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2">
-              <p className="text-sm text-destructive">
-                Tu cuenta fue desactivada. Contactá al administrador.
+            <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2.5">
+              <p className="text-sm font-medium text-destructive">
+                {ACCOUNT_ACCESS_DENIED_TITLE}
+              </p>
+              <p className="mt-1 text-sm text-destructive/90">
+                {ACCOUNT_ACCESS_DENIED_MESSAGE}
               </p>
             </div>
           )}

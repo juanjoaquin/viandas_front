@@ -17,6 +17,11 @@ export function TokenRefresher() {
 
       if (response.status === 401) {
         router.replace("/login");
+        return;
+      }
+
+      if (response.status === 403) {
+        router.replace("/login?inactive=1");
       }
     }
 
