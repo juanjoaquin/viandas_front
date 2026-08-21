@@ -334,7 +334,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         )}
       </SidebarContent>
 
-      <SidebarMenu className="px-2">
+      <SidebarMenu className="mt-auto px-2">
         <SidebarMenuItem>
           <ThemeToggle />
         </SidebarMenuItem>
