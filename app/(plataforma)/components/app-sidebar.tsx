@@ -324,7 +324,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {visibleUsersNavItems.length > 0 && (
           <SidebarGroup className="px-2 pb-2 pt-1">
-            <SidebarGroupLabel className={sectionLabelClassName}>
+            <SidebarGroupLabel className={cn(sectionLabelClassName, "uppercase")}>
               Usuarios
             </SidebarGroupLabel>
             <SidebarGroupContent>
